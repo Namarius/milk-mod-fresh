@@ -1,4 +1,4 @@
-scriptName mmf_Core extends Quest
+scriptName mmf_Core extends ReferenceAlias
 {
   Autor: Namarius
   Purpose: core functionality for MMF
@@ -6,6 +6,8 @@ scriptName mmf_Core extends Quest
 
 string property cLEVEL = "Level" autoReadOnly
 string property cFILL = "Fill" autoReadOnly
+
+int mSelectKey = 9
 
 string[] gSliderLevelName
 float[] gSliderLevelLow
@@ -18,6 +20,9 @@ float[] gSliderFillHigh
 import mmf_Debug
 
 event OnInit()
+  if mSelectKey != 0
+    RegisterForKey(mSelectKey)
+  endIf
 endEvent
 
 string[] function GetSliderNames(string pGroup)
@@ -314,3 +319,37 @@ int function RenameSliderLevel(string pOldName, string pNewName)
   return oldIndex
 
 endFunction
+
+;---------------------------
+; select and interaction key
+;---------------------------
+
+int function GetSelectKey()
+  return mSelectKey
+endFunction
+
+function SetSelectKey(int pKeyCode) 
+  UnregisterForAllKeys()
+  
+  mSelectKey = pKeyCode
+
+  if mSelectKey != 0
+    RegisterForKey(mSelectKey)
+  endIf
+endFunction
+
+event OnKeyUp(int pKeyCode, float pHoldTime) 
+  if Utility.IsInMenuMode() 
+    return
+  endIf
+
+  ObjectReference ref = Game.GetCurrentCrosshairRef()
+
+  if ref != None
+    Debug.MessageBox("Reference is: " + ref)
+  endIf
+
+endEvent
+
+;--
+

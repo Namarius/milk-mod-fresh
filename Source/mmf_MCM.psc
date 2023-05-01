@@ -14,6 +14,11 @@ float gChangeSliderLow ; global low holder for subpage to change sliders
 float gChangeSliderHigh ; global high holder for subpage to change sliders
 int gSliderChangeIndex ; global index holder for subpage to change sliders
 
+string cPageHello = "Hello"
+string cPageLevelSlider = "Level Sliders"
+string cPageFillSliders = "Fill Sliders"
+string cPageOptions = "Options"
+
 event OnConfigOpen()
   gSliderGroup = ""
   gSliderChangeIndex = -1
@@ -23,10 +28,11 @@ endEvent
 event OnConfigInit()
   ModName = "Milk Mod Fresh"
 
-  Pages = new string [3]
-  Pages[0] = "Hello"
-  Pages[1] = "Level Sliders"
-  Pages[2] = "Fill Sliders"
+  Pages = new string [4]
+  Pages[0] = cPageHello
+  Pages[1] = cPageLevelSlider
+  Pages[2] = cPageFillSliders
+  Pages[3] = cPageOptions
 endEvent
 
 event OnPageReset(string pPage)
@@ -38,6 +44,9 @@ event OnPageReset(string pPage)
     return
   elseIf pPage == Pages[2]
     DisplayPageFillSliders()
+    return
+  elseIf pPage == Pages[3]
+    DisplayPageOptions()
     return
   elseIf pPage == ""
     Log("[mcm]:empty page")
@@ -93,7 +102,16 @@ function DisplayPageFillSliders()
   endIf
 endFunction
 
+function DisplayPageOptions()
+  SetCursorFillMode(LEFT_TO_RIGHT)
+  SetCursorPosition(0)
 
+  AddKeyMapOptionST("SelectKeySetup", "Option Key", gCore.GetSelectKey())
+endFunction
+
+;
+; Other Pages
+;
 
 function DisplaySubpageChangeSlider(string name, float low, float high)
   gChangeSliderName = name
@@ -261,6 +279,26 @@ event OnSelectST()
 endEvent
 
 endState
+;-------------------
+state SelectKeySetup
+
+event OnKeyMapChangeST(int pKeyCode, string pConflictControl, string pConfiglictName)
+  if pConflictControl != "" && pKeyCode != 0
+    if !ShowMessage("$SKI_MSG2{"+pConflictControl+"}", true)
+      return
+    endIf
+  endIf
+
+  gCore.SetSelectKey(pKeyCode)
+  SetKeyMapOptionValueST(pKeyCode)
+endEvent
+
+event OnHighlightST()
+  SetInfoText("TODO")
+endEvent
+
+endState
+;-------
 
 ;
 ; Utils
