@@ -8,10 +8,16 @@ function Log(string msg) global
   CLog(s)
 endFunction
 
-function LogScr(string script, string msg) global
+function LogSrc(string script, string msg) global
   string s = "[mmf:"+script+"]" + msg
   Debug.Trace(s)
   CLog(s)
+endFunction
+
+function Fatal(string msg) global
+  string s = "Fatal [mmf]:\n" + msg
+  Debug.MessageBox(s)
+  CLog("[mmf:fatal]:" + msg)
 endFunction
 
 function Unreachable() global

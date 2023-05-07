@@ -7,13 +7,15 @@ mmf_Core property gCore auto
 string sSelf = "mmf_Milktracker"
 
 event OnEffectStart(Actor pTarget, Actor pCaster)
-  Log("EffectStart:"+pTarget)
+  LogSrc("mmf_Milktracker", "OnEffectStart:target="+pTarget+",self="+self)
+  gCore.AddTrackingActor(pTarget)
 endEvent
 
-event OnEffectFinish(Actor pTarget, Actor pCaster)
-  Log("EffectStop:"+pTarget)
+event OnDeath(Actor pKiller)
+  LogSrc("mmf_Milktracker", "OnDeath")
+  gCore.RemoveDirtyTrackingActor(self.GetTargetActor())
 endEvent
 
-event OnObjectEquipped(Form pBaseObject, ObjectReference pRef)
-  LogScr(sSelf, "Base: " + pBaseObject + ", Ref:" + pRef)
+event OnEffectEnd(Actor pTarget, Actor pCaster)
+  LogSrc("mmf_Milktracker", "OnEffectEnd:act=" + pTarget)
 endEvent

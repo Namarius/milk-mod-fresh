@@ -5,7 +5,7 @@ mmf_Core property gCore auto
 import mmf_Domain
 import mmf_Debug
 
-string gSliderGroup ; currently displayed slider groups (Fill,Level)
+string gSliderGroup ; currently displayed slider groups (Fill,Level,Stomach,Pad)
 string[] gPresetList ; list of all slider presets from B
 int[] gSliderMapOptionIndex ; list of all slider option indexes for a single slider view
 
@@ -17,22 +17,39 @@ int gSliderChangeIndex ; global index holder for subpage to change sliders
 string cPageHello = "Hello"
 string cPageLevelSlider = "Level Sliders"
 string cPageFillSliders = "Fill Sliders"
+string cPageStomachSliders = "Stomach Sliders"
+string cPagePadSliders = "Pad Sliders"
 string cPageOptions = "Options"
+string cPageDebug = "Debug"
+
+string cUpdateEvent = "mmf::UpdateDebugPage"
 
 event OnConfigOpen()
+  RegisterForModEvent(cUpdateEvent, "OnUpdateDebugPage")
+
   gSliderGroup = ""
   gSliderChangeIndex = -1
   gSliderMapOptionIndex = Utility.CreateIntArray(0)
 endEvent
 
+event OnUpdateDebugPage()
+  LogSrc("mmf_MCM", "OnUpdateDebugPage")
+  if CurrentPage == cPageDebug
+    updatePageDebug()
+  endIf
+endEvent
+
 event OnConfigInit()
   ModName = "Milk Mod Fresh"
 
-  Pages = new string [4]
+  Pages = new string [7]
   Pages[0] = cPageHello
   Pages[1] = cPageLevelSlider
   Pages[2] = cPageFillSliders
-  Pages[3] = cPageOptions
+  Pages[3] = cPageStomachSliders
+  Pages[4] = cPagePadSliders
+  Pages[5] = cPageOptions
+  Pages[6] = cPageDebug
 endEvent
 
 event OnPageReset(string pPage)
@@ -40,21 +57,30 @@ event OnPageReset(string pPage)
     DisplayPageHello()
     return
   elseIf pPage == Pages[1]
-    DisplayPageLevelSliders()
+    DisplayPageSliders(gCore.cLEVEL)
     return
   elseIf pPage == Pages[2]
-    DisplayPageFillSliders()
+    DisplayPageSliders(gCore.cFILL)
     return
   elseIf pPage == Pages[3]
+    DisplayPageSliders(gCore.cSTOMACH)
+    return
+  elseIf pPage == Pages[4]
+    DisplayPageSliders(gCore.cPAD)
+    return
+  elseIf pPage == Pages[5]
     DisplayPageOptions()
     return
+  elseIf pPage == Pages[6]
+    DisplayPageDebug()
+    return
   elseIf pPage == ""
-    Log("[mcm]:empty page")
+    LogSrc("mmf_MCM","empty page")
     return
   endIf
 
   Unreachable()
-  Log(pPage)
+  LogSrc("mmf_MCM", pPage)
 endEvent
 
 ;
@@ -68,32 +94,15 @@ function DisplayPageHello()
   AddHeaderOption("Hello")
 endFunction
 
-function DisplayPageLevelSliders()
-  string[] names = gCore.GetSliderNames(gCore.cLEVEL)
-  float[] low = gCore.GetSliderLow(gCore.cLEVEL)
-  float[] high = gCore.GetSliderHigh(gCore.cLEVEL)
+function DisplayPageSliders(string pType)
+  string[] names = gCore.GetSliderNames(pType)
+  float[] low = gCore.GetSliderLow(pType)
+  float[] high = gCore.GetSliderHigh(pType)
 
-  if gSliderGroup != gCore.cLEVEL
-    gSliderGroup = gCore.cLEVEL
+  if gSliderGroup != pType
+    gSliderGroup = pType
     gSliderChangeIndex = -1
   endif
-
-  if gSliderChangeIndex < 0
-    DisplayPageSliderOverview(names, low, high)
-  else
-    DisplaySubpageChangeSlider(names[gSliderChangeIndex], low[gSliderChangeIndex], high[gSliderChangeIndex])
-  endIf
-endFunction
-
-function DisplayPageFillSliders()
-  string[] names = gCore.GetSliderNames(gCore.cFILL)
-  float[] low = gCore.GetSliderLow(gCore.cFILL)
-  float[] high = gCore.GetSliderHigh(gCore.cFILL)
-
-  if gSliderGroup != gCore.cFILL
-    gSliderGroup = gCore.cFILL
-    gSliderChangeIndex = -1
-  endIf
 
   if gSliderChangeIndex < 0
     DisplayPageSliderOverview(names, low, high)
@@ -107,6 +116,135 @@ function DisplayPageOptions()
   SetCursorPosition(0)
 
   AddKeyMapOptionST("SelectKeySetup", "Option Key", gCore.GetSelectKey())
+  AddEmptyOption()
+
+
+  AddHeaderOption("Milk Capacity")
+  AddEmptyOption()
+
+  AddInputOptionST("SetMilkCapacitySoftMin", "Soft Min. Capacity", gCore.gMilkCapacitySoftMin)
+  AddInputOptionST("SetMilkCapacityHardMin", "Hard Min. Capacity", gCore.gMilkCapacityHardMin)
+
+  AddInputOptionST("SetMilkCapacitySoftMax", "Soft Max. Capacity", gCore.gMilkCapacitySoftMax)
+  AddInputOptionST("SetMilkCapacityHardMax", "Hard Max. Capacity", gCore.gMilkCapacityHardMax)
+
+
+  AddHeaderOption("Milk Production")
+  AddEmptyOption()
+
+  AddInputOptionST("SetMilkProductionSoftMin", "Soft Min. Milk Production", gCore.gMilkProductionSoftMin)
+  AddInputOptionST("SetMilkProductionHardMin", "Hard Min. Milk Production", gCore.gMilkProductionHardMin)
+
+  AddInputOptionST("SetMilkProductionSoftMax", "Soft Max. Milk Production", gCore.gMilkProductionSoftMax)
+  AddInputOptionST("SetMilkProductionHardMax", "Hard Max. Milk Production", gCore.gMilkProductionHardMax)
+
+
+  AddHeaderOption("Lactacid")
+  AddEmptyOption()
+
+  AddInputOptionST("SetLactacidSoftMax", "Soft Max. Lactacid", gCore.gLactacidSoftMax)
+  AddInputOptionST("SetLactacidHardMax", "Hard Max. Lactacid", gCore.gLactacidHardMax)
+
+  AddInputOptionST("SetLactacidDecayTime", "Decay By Time", gCore.gLactacidDecayTime)
+  AddInputOptionST("SetLactacidDecayMilkProduction", "Decay By Milk Production", gCore.gLactacidDecayMilkProduction)
+
+  AddInputOptionST("SetLactacidMultMilkCapacity", "Mult. Milk Capacity", gCore.gLactacidMultMilkCapacity)
+  AddInputOptionST("SetLactacidMultMilkProduction", "Mult. Milk Production", gCore.gLactacidMultMilkProduction)
+
+  AddInputOptionST("SetLactacidAddMilkCapacity", "Add Milk Capacity", gCore.gLactacidAddMilkCapacity)
+  AddInputOptionST("SetLactacidAddMilkProduction", "Add Milk Production", gCore.gLactacidAddMilkProduction)
+
+  AddEmptyOption()
+  AddEmptyOption()
+
+  AddTextOptionST("SaveConfiguration","Save Configuration", "")
+endFunction
+
+int gDebugIndex = 0
+int gDebugObj = 0
+
+function updatePageDebug()
+  Actor act = gCore.GetTrackedActor(gDebugIndex)
+
+  int maxIndex = gCore.GetTrackedActorCount()
+
+  if act != None
+    gDebugObj = JValue_releaseAndRetain(gDebugObj, JFormDB_findEntry(gCore.cBASE, act))
+    
+    SetTextOptionValueST(act.GetActorBase().GetName() + "(" + act.GetFormID() + ")", true, "DebugActorName")
+    SetTextOptionValueST((gDebugIndex+1) +"/"+ maxIndex, true, "DebugIndex")
+
+    SetOptionFlagsST(0, true, "SetDebugMilk")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cMilk), true, "SetDebugMilk")
+    SetOptionFlagsST(0, true, "SetDebugProduction")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cProduction), true, "SetDebugProduction")
+  
+    SetOptionFlagsST(0, true, "SetDebugCapacity")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cCapacity), true, "SetDebugCapacity")
+    SetOptionFlagsST(0, true, "SetDebugLactacid")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cLactacid), true, "SetDebugLactacid")
+  
+    SetOptionFlagsST(0, true, "ToggleDebugPregnant")
+    SetToggleOptionValueST(JValue_solveInt(gDebugObj, gCore.cPregnant) == 1, true, "ToggleDebugPregnant")
+  else 
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "DebugActorName")
+    SetTextOptionValueST("N/A", true, "DebugActorName")
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "DebugIndex")
+    SetTextOptionValueST("-", true, "DebugIndex")
+  
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugMilk")
+    SetInputOptionValueST("N/A", true, "SetDebugMilk")
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugProduction")
+    SetInputOptionValueST("N/A", true, "SetDebugProduction")
+    
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugCapacity")
+    SetInputOptionValueST("N/A", true, "SetDebugCapacity")
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugLactacid")
+    SetInputOptionValueST("N/A", true, "SetDebugLactacid")
+    
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "ToggleDebugPregnant")
+    SetToggleOptionValueST(false, true, "ToggleDebugPregnant")
+  endIf
+
+  if gDebugIndex <= 0
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "PrevDebugActor")
+  else
+    SetOptionFlagsST(0, true, "PrevDebugActor")
+  endIf
+
+  if gDebugIndex >= maxIndex - 1
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, false, "NextDebugActor")
+  else
+    SetOptionFlagsST(0, false, "NextDebugActor")
+  endIf
+endFunction
+
+function DisplayPageDebug()
+  SetCursorFillMode(LEFT_TO_RIGHT)
+  SetCursorPosition(0)
+
+  AddTextOptionST("DebugActorName", "Name", "")
+  AddTextOptionST("DebugIndex", "Index", gDebugIndex)
+
+  AddTextOptionST("PrevDebugActor", "$Previous", "", OPTION_FLAG_DISABLED)
+  AddTextOptionST("NextDebugActor", "$Next", "", OPTION_FLAG_DISABLED)
+
+  AddHeaderOption("Values")
+  AddEmptyOption()
+
+  AddInputOptionST("SetDebugMilk", "Milk", "Loading")
+  AddInputOptionST("SetDebugProduction", "Production", "Loading")
+
+  AddInputOptionST("SetDebugCapacity", "Capacity", "Loading")
+  AddInputOptionST("SetDebugLactacid", "Lactacid", "Loading")
+
+  AddToggleOptionST("ToggleDebugPregnant", "Pregnant", false)
+  AddEmptyOption()
+
+  AddTextOptionST("DebugUpdateActor", "Update Actor", "")
+
+  int evt = ModEvent.Create(cUpdateEvent)
+  ModEvent.Send(evt)
 endFunction
 
 ;
@@ -298,8 +436,341 @@ event OnHighlightST()
 endEvent
 
 endState
-;-------
+;-----------------------
+state SetMilkCapacitySoftMin
 
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacitySoftMin)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacitySoftMin = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------
+state SetMilkCapacityHardMin
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityHardMin)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityHardMin = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacitySoftMax
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacitySoftMax)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacitySoftMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityHardMax
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityHardMax)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityHardMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------
+state SetMilkProductionSoftMin
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionSoftMin)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionSoftMin = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------
+state SetMilkProductionHardMin
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionHardMin)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionHardMin = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionSoftMax
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionSoftMax)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionSoftMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionHardMax
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionHardMax)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionHardMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-------
+state SetLactacidSoftMax
+  event OnInputOpenST()
+    SetInputDialogStartText(gCore.gLactacidSoftMax)
+  endEvent
+  
+  event OnInputAcceptST(string pValue)
+    float fValue = pValue as float
+    gCore.gLactacidSoftMax = fValue
+    SetInputOptionValueST(fValue)
+  endEvent
+endState
+;-------
+state SetLactacidHardMax
+  event OnInputOpenST()
+    SetInputDialogStartText(gCore.gLactacidHardMax)
+  endEvent
+  
+  event OnInputAcceptST(string pValue)
+    float fValue = pValue as float
+    gCore.gLactacidHardMax = fValue
+    SetInputOptionValueST(fValue)
+  endEvent
+endState
+;-------------------------
+state SetLactacidDecayTime
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidDecayTime)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidDecayTime = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------------------
+state SetLactacidDecayMilkProduction
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidDecayMilkProduction)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidDecayMilkProduction = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------------------
+state SetLactacidMultMilkCapacity
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidMultMilkCapacity)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidMultMilkCapacity = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------------------------
+state SetLactacidMultMilkProduction
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidMultMilkProduction)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidMultMilkProduction = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-------------------------------
+state SetLactacidAddMilkCapacity
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidAddMilkCapacity)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidAddMilkCapacity = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------------
+state SetLactacidAddMilkProduction
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gLactacidAddMilkProduction)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gLactacidAddMilkProduction = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;----------------------
+state SaveConfiguration
+
+event OnSelectST()
+  gCore.WriteOptionsToFile()
+  ShowMessage("Saved", false)
+endEvent
+
+endState
+;-------
+state PrevDebugActor
+
+event OnSelectST()
+  if gDebugIndex > 0
+    gDebugIndex -= 1
+    updatePageDebug()
+  else
+    SetOptionFlagsST(OPTION_FLAG_DISABLED)
+  endIf
+endEvent
+
+endState
+;-------
+state NextDebugActor
+
+event OnSelectST()
+  if gDebugIndex < (gCore.GetTrackedActorCount() - 1)
+    gDebugIndex += 1
+    updatePageDebug()
+  else
+    SetOptionFlagsST(OPTION_FLAG_DISABLED)
+  endIf
+endEvent
+
+endState
+;-----------------
+state SetDebugMilk
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cMilk))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cMilk, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------
+state SetDebugProduction
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cProduction))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cProduction, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------
+state SetDebugLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cLactacid))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cLactacid, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------
+state SetDebugCapacity
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cCapacity))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cCapacity, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-------
+state ToggleDebugPregnant
+
+event OnSelectST()
+  int iValue = JValue_solveInt(gDebugObj, gCore.cPregnant)
+  if iValue == 0
+    iValue = 1
+  else
+    iValue = 0
+  endIf
+
+  JValue_solveIntSetter(gDebugObj, gCore.cPregnant, iValue)
+  SetToggleOptionValueST(iValue == 1)
+endEvent
+
+endState
+;-------
+state DebugUpdateActor
+
+event OnSelectST()
+  gCore.UpdateActorByIndex(gDebugIndex)
+endEvent
+
+endState
 ;
 ; Utils
 ;

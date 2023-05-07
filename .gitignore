@@ -4,3 +4,4 @@ meta.ini
 SkyrimSE.code-workspace
 skyrimse.ppj
 *.txt
+/SKSE/mmf_config.json
