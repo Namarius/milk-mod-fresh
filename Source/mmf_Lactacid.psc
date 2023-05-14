@@ -16,9 +16,9 @@ event OnEffectStart(Actor pTarget, Actor pCaster)
     return
   endIf
 
-  float fValue = JValue_solveFlt(obj, gCore.cLactacid)
+  float fValue = JValue_solveFlt(obj, gCore.cStomach)
   fValue += mag
-  JValue_solveFltSetter(obj, gCore.cLactacid, fValue)
+  JValue_solveFltSetter(obj, gCore.cStomach, fValue)
 
   gCore.updateActor(pTarget)
 endEvent
