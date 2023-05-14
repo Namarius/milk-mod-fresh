@@ -5,6 +5,8 @@ mmf_Core property gCore auto
 import mmf_Domain
 import mmf_Debug
 
+float cMaxFlt = 340282346638528859811704183484516925440.0
+
 string gSliderGroup ; currently displayed slider groups (Fill,Level,Stomach,Pad)
 string[] gPresetList ; list of all slider presets from B
 int[] gSliderMapOptionIndex ; list of all slider option indexes for a single slider view
@@ -57,16 +59,16 @@ event OnPageReset(string pPage)
     DisplayPageHello()
     return
   elseIf pPage == Pages[1]
-    DisplayPageSliders(gCore.cLEVEL)
+    DisplayPageSliders(gCore.cMILK_CAPACITY_SLIDER)
     return
   elseIf pPage == Pages[2]
-    DisplayPageSliders(gCore.cFILL)
+    DisplayPageSliders(gCore.cMILK_FILLING_SLIDER)
     return
   elseIf pPage == Pages[3]
-    DisplayPageSliders(gCore.cSTOMACH)
+    DisplayPageSliders(gCore.cSTOMACH_SLIDER)
     return
   elseIf pPage == Pages[4]
-    DisplayPageSliders(gCore.cPAD)
+    DisplayPageSliders(gCore.cLACTACID_SLIDER)
     return
   elseIf pPage == Pages[5]
     DisplayPageOptions()
@@ -92,6 +94,9 @@ function DisplayPageHello()
   SetCursorPosition(0)
 
   AddHeaderOption("Hello")
+  AddEmptyOption()
+
+  AddTextOption("GameTime", gCore.gGameTime.GetValue())
 endFunction
 
 function DisplayPageSliders(string pType)
@@ -122,39 +127,70 @@ function DisplayPageOptions()
   AddHeaderOption("Milk Capacity")
   AddEmptyOption()
 
-  AddInputOptionST("SetMilkCapacitySoftMin", "Soft Min. Capacity", gCore.gMilkCapacitySoftMin)
-  AddInputOptionST("SetMilkCapacityHardMin", "Hard Min. Capacity", gCore.gMilkCapacityHardMin)
+  AddInputOptionST("SetMilkCapacitySoftMin", "Soft Minimum", gCore.gMilkCapacitySoftMin)
+  AddInputOptionST("SetMilkCapacityHardMin", "Hard Minimum", gCore.gMilkCapacityHardMin)
 
-  AddInputOptionST("SetMilkCapacitySoftMax", "Soft Max. Capacity", gCore.gMilkCapacitySoftMax)
-  AddInputOptionST("SetMilkCapacityHardMax", "Hard Max. Capacity", gCore.gMilkCapacityHardMax)
+  AddInputOptionST("SetMilkCapacitySoftMax", "Soft Maximum", gCore.gMilkCapacitySoftMax)
+  AddInputOptionST("SetMilkCapacityHardMax", "Hard Maximum", gCore.gMilkCapacityHardMax)
 
+  AddInputOptionST("SetMilkCapacityGrowMilking", "Grow by Milking", gCore.gMilkCapacityGrowMilking)
+  AddInputOptionST("SetMilkCapacityGrowLactacid", "Grow by Lactacid", gCore.gMilkCapacityGrowLactacid)
+
+  AddInputOptionST("SetMilkCapacityGrowPregnant", "Grow by Pregnancy", gCore.gMilkCapacityGrowPregnant)
+  AddInputOptionST("SetMilkCapacityGrowFill", "Grow by Filling", gCore.gMilkCapacityGrowFill)
+
+  AddInputOptionST("SetMilkCapacityBuffAddLactacid", "Add by Lactacid", gCore.gMilkCapacityBuffAddLactacid)
+  AddInputOptionST("SetMilkCapacityBuffAddPregnant", "Add by Pregnancy", gCore.gMilkCapacityBuffAddPregnant)
+
+  AddInputOptionST("SetMilkCapacityBuffMultLactacid", "Mult by Lactacid", gCore.gMilkCapacityBuffMultLactacid)
+  AddInputOptionST("SetMilkCapacityBuffMultPregnant", "Mult by Pregnancy", gCore.gMilkCapacityBuffMultPregnant)
+  
+  AddInputOptionST("SetMilkCapacityDecayTime", "Decay by Time", gCore.gMilkCapacityDecayTime)
+  AddEmptyOption()
 
   AddHeaderOption("Milk Production")
   AddEmptyOption()
 
-  AddInputOptionST("SetMilkProductionSoftMin", "Soft Min. Milk Production", gCore.gMilkProductionSoftMin)
-  AddInputOptionST("SetMilkProductionHardMin", "Hard Min. Milk Production", gCore.gMilkProductionHardMin)
+  AddInputOptionST("SetMilkProductionSoftMin", "Soft Minimum", gCore.gMilkProductionSoftMin)
+  AddInputOptionST("SetMilkProductionHardMin", "Hard Minimum", gCore.gMilkProductionHardMin)
 
-  AddInputOptionST("SetMilkProductionSoftMax", "Soft Max. Milk Production", gCore.gMilkProductionSoftMax)
-  AddInputOptionST("SetMilkProductionHardMax", "Hard Max. Milk Production", gCore.gMilkProductionHardMax)
+  AddInputOptionST("SetMilkProductionSoftMax", "Soft Maximum", gCore.gMilkProductionSoftMax)
+  AddInputOptionST("SetMilkProductionHardMax", "Hard Maximum", gCore.gMilkProductionHardMax)
 
+  AddInputOptionST("SetMilkProductionGrowMilking", "Grow by Milking", gCore.gMilkProductionGrowMilking)
+  AddInputOptionST("SetMilkProductionGrowLactacid", "Grow by Lactacid", gCore.gMilkProductionGrowLactacid)
+
+  AddInputOptionST("SetMilkProductionGrowPregnant", "Grow by Pregnancy", gCore.gMilkProductionGrowPregnant)
+  AddEmptyOption()
+
+  AddInputOptionST("SetMilkProductionBuffAddLactacid", "Add by Lactacid", gCore.gMilkProductionBuffAddLactacid)
+  AddInputOptionST("SetMilkProductionBuffAddPregnant", "Add by Pregnancy", gCore.gMilkProductionBuffAddPregnant)
+
+  AddInputOptionST("SetMilkProductionBuffMultLactacid", "Multiply by Lactacid", gCore.gMilkProductionBuffMultLactacid)
+  AddInputOptionST("SetMilkProductionBuffMultPregnant", "Multiply by Pregnancy", gCore.gMilkProductionBuffMultPregnant)
+
+  AddInputOptionST("SetMilkProductionDecayTime", "Decay by Time", gCore.gMilkProductionDecayTime)
+  AddEmptyOption()
 
   AddHeaderOption("Lactacid")
   AddEmptyOption()
 
-  AddInputOptionST("SetLactacidSoftMax", "Soft Max. Lactacid", gCore.gLactacidSoftMax)
-  AddInputOptionST("SetLactacidHardMax", "Hard Max. Lactacid", gCore.gLactacidHardMax)
+  AddInputOptionST("SetLactacidSoftMax", "Soft Maximum", gCore.gLactacidSoftMax)
+  AddInputOptionST("SetLactacidHardMax", "Hard Maximum", gCore.gLactacidHardMax)
 
-  AddInputOptionST("SetLactacidDecayTime", "Decay By Time", gCore.gLactacidDecayTime)
-  AddInputOptionST("SetLactacidDecayMilkProduction", "Decay By Milk Production", gCore.gLactacidDecayMilkProduction)
+  AddInputOptionST("SetLactacidDecayTime", "Decay by Time", gCore.gLactacidDecayTime)
+  AddInputOptionST("SetLactacidDecayMilkProduction", "Decay by Milk Production", gCore.gLactacidDecayMilkProduction)
 
-  AddInputOptionST("SetLactacidMultMilkCapacity", "Mult. Milk Capacity", gCore.gLactacidMultMilkCapacity)
-  AddInputOptionST("SetLactacidMultMilkProduction", "Mult. Milk Production", gCore.gLactacidMultMilkProduction)
-
-  AddInputOptionST("SetLactacidAddMilkCapacity", "Add Milk Capacity", gCore.gLactacidAddMilkCapacity)
-  AddInputOptionST("SetLactacidAddMilkProduction", "Add Milk Production", gCore.gLactacidAddMilkProduction)
-
+  AddHeaderOption("Stomach")
   AddEmptyOption()
+
+  AddInputOptionST("SetStomachSoftMax", "Soft Maximum", gCore.gStomachSoftMax)
+  AddInputOptionST("SetStomachHardMax", "Hard Maximum", gCore.gStomachHardMax)
+
+  AddInputOptionST("SetStomachDecayTime", "Decay by Time", gCore.gStomachAbsorbTime)
+  AddEmptyOption()
+
+  AddHeaderOption("Save/Load")
   AddEmptyOption()
 
   AddTextOptionST("SaveConfiguration","Save Configuration", "")
@@ -183,9 +219,14 @@ function updatePageDebug()
     SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cCapacity), true, "SetDebugCapacity")
     SetOptionFlagsST(0, true, "SetDebugLactacid")
     SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cLactacid), true, "SetDebugLactacid")
+    
+    SetOptionFlagsST(0, true, "SetDebugStomach")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cStomach), true, "SetDebugStomach")
+    SetOptionFlagsST(0, true, "SetDebugGameTime")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cGameTime), true, "SetDebugGameTime")
   
-    SetOptionFlagsST(0, true, "ToggleDebugPregnant")
-    SetToggleOptionValueST(JValue_solveInt(gDebugObj, gCore.cPregnant) == 1, true, "ToggleDebugPregnant")
+    SetOptionFlagsST(0, true, "SetDebugPregnant")
+    SetInputOptionValueST(JValue_solveFlt(gDebugObj, gCore.cPregnant), true, "SetDebugPregnant")
   else 
     SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "DebugActorName")
     SetTextOptionValueST("N/A", true, "DebugActorName")
@@ -201,9 +242,14 @@ function updatePageDebug()
     SetInputOptionValueST("N/A", true, "SetDebugCapacity")
     SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugLactacid")
     SetInputOptionValueST("N/A", true, "SetDebugLactacid")
+
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugStomach")
+    SetInputOptionValueST("N/A", true, "SetDebugStomach")
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugGameTime")
+    SetInputOptionValueST("N/A", true, "SetDebugGameTime")
     
-    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "ToggleDebugPregnant")
-    SetToggleOptionValueST(false, true, "ToggleDebugPregnant")
+    SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugPregnant")
+    SetToggleOptionValueST(false, true, "SetDebugPregnant")
   endIf
 
   if gDebugIndex <= 0
@@ -238,9 +284,13 @@ function DisplayPageDebug()
   AddInputOptionST("SetDebugCapacity", "Capacity", "Loading")
   AddInputOptionST("SetDebugLactacid", "Lactacid", "Loading")
 
-  AddToggleOptionST("ToggleDebugPregnant", "Pregnant", false)
+  AddInputOptionST("SetDebugStomach", "Stomach", "Loading")
+  AddInputOptionST("SetDebugGameTime", "GameTime", "Loading")
+
+  AddInputOptionST("SetDebugPregnant", "Pregnant", "Loading")
   AddEmptyOption()
 
+  AddTextOptionST("DebugUpdateValues", "Update Values", "")
   AddTextOptionST("DebugUpdateActor", "Update Actor", "")
 
   int evt = ModEvent.Create(cUpdateEvent)
@@ -321,6 +371,10 @@ endEvent
 ;
 
 ;-----------------------
+
+;
+; Sliders
+;
 state SelectSliderPreset
 
 event OnMenuOpenST()
@@ -417,7 +471,9 @@ event OnSelectST()
 endEvent
 
 endState
+
 ;-------------------
+
 state SelectKeySetup
 
 event OnKeyMapChangeST(int pKeyCode, string pConflictControl, string pConfiglictName)
@@ -437,6 +493,31 @@ endEvent
 
 endState
 ;-----------------------
+
+;
+; Options States
+;
+
+bool function fltNotBetween(float pValue, float pMin, float pMax)
+  if pValue < pMin || pValue > pMax
+    if pMax >= cMaxFlt
+      ShowMessage("Value must be between "+pMin+" and 'maximum single-precision float'\n(Keep the vaule sane)", false)
+    else
+      ShowMessage("Value must be between "+pMin+" and "+pMax, false)
+    endIf
+    return true
+  endIf
+  return false
+endFunction
+
+bool function fltNotLessZero(float pValue)
+  if pValue < 0.0
+    ShowMessage("Value mut be greater than or equal to 0", false)
+    return true
+  endIf
+  return false
+endFunction
+
 state SetMilkCapacitySoftMin
 
 event OnInputOpenST()
@@ -445,6 +526,12 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) 
+    return
+  endIf
+  if fltNotBetween(fValue, gCore.gMilkCapacityHardMin, gCore.gMilkCapacitySoftMax)
+    return
+  endIf
   gCore.gMilkCapacitySoftMin = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -459,6 +546,12 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) 
+    return
+  endIf
+  if fltNotBetween(fValue, 0.0, gCore.gMilkCapacitySoftMin)
+    return
+  endIf
   gCore.gMilkCapacityHardMin = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -473,6 +566,12 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue)
+    return
+  endIf
+  if fltNotBetween(fValue, gCore.gMilkCapacitySoftMin, gCore.gMilkCapacityHardMax)
+    return
+  endIf
   gCore.gMilkCapacitySoftMax = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -487,7 +586,136 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) || fltNotBetween(fValue, gCore.gMilkCapacitySoftMax, cMaxFlt)
+    return
+  endIf
   gCore.gMilkCapacityHardMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityGrowMilking
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityGrowMilking)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityGrowMilking = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityGrowLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityGrowLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityGrowLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityGrowPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityGrowPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityGrowPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityGrowFill
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityGrowFill)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityGrowFill = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityBuffAddLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityBuffAddLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityBuffAddLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityBuffAddPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityBuffAddPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityBuffAddPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityBuffMultLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityBuffMultLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityBuffMultLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityBuffMultPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityBuffMultPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityBuffMultPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkCapacityDecayTime
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkCapacityDecayTime)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkCapacityDecayTime = fValue
   SetInputOptionValueST(fValue)
 endEvent
 
@@ -501,6 +729,9 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) || fltNotBetween(fValue, gCore.gMilkProductionHardMin, gCore.gMilkProductionSoftMax)
+    return
+  endIf
   gCore.gMilkProductionSoftMin = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -515,6 +746,9 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) || fltNotBetween(fValue, 0.0, gCore.gMilkProductionSoftMin)
+    return
+  endIf
   gCore.gMilkProductionHardMin = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -529,6 +763,9 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) || fltNotBetween(fValue, gCore.gMilkProductionSoftMin, gCore.gMilkProductionHardMax)
+    return
+  endIf
   gCore.gMilkProductionSoftMax = fValue
   SetInputOptionValueST(fValue)
 endEvent
@@ -543,7 +780,122 @@ endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
+  if fltNotLessZero(fValue) || fltNotBetween(fValue, gCore.gMilkProductionSoftMax, cMaxFlt)
+    return
+  endIf
   gCore.gMilkProductionHardMax = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionGrowMilking
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionGrowMilking)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionGrowMilking = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionGrowLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionGrowLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionGrowLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionGrowPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionGrowPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionGrowPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionBuffAddLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionBuffAddLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionBuffAddLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionBuffAddPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionBuffAddPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionBuffAddPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionBuffMultLactacid
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionBuffMultLactacid)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionBuffMultLactacid = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionBuffMultPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionBuffMultPregnant)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionBuffMultPregnant = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;---------------------------
+state SetMilkProductionDecayTime
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkProductionDecayTime)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  gCore.gMilkProductionDecayTime = fValue
   SetInputOptionValueST(fValue)
 endEvent
 
@@ -556,6 +908,9 @@ state SetLactacidSoftMax
   
   event OnInputAcceptST(string pValue)
     float fValue = pValue as float
+    if fltNotBetween(fValue, 0.0, gCore.gLactacidHardMax)
+      return
+    endIf
     gCore.gLactacidSoftMax = fValue
     SetInputOptionValueST(fValue)
   endEvent
@@ -568,6 +923,9 @@ state SetLactacidHardMax
   
   event OnInputAcceptST(string pValue)
     float fValue = pValue as float
+    if fltNotBetween(fValue, gCore.gLactacidSoftMax, cMaxFlt)
+      return
+    endIf
     gCore.gLactacidHardMax = fValue
     SetInputOptionValueST(fValue)
   endEvent
@@ -600,58 +958,44 @@ event OnInputAcceptST(string pValue)
 endEvent
 
 endState
-;-----------------------------------
-state SetLactacidMultMilkCapacity
+;-------
+state SetStomachSoftMax
 
 event OnInputOpenST()
-  SetInputDialogStartText(gCore.gLactacidMultMilkCapacity)
+  SetInputDialogStartText(gCore.gStomachSoftMax)
 endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
-  gCore.gLactacidMultMilkCapacity = fValue
+  gCore.gStomachSoftMax = fValue
   SetInputOptionValueST(fValue)
 endEvent
 
 endState
-;-----------------------------------
-state SetLactacidMultMilkProduction
+;-------
+state SetStomachHardMax
 
 event OnInputOpenST()
-  SetInputDialogStartText(gCore.gLactacidMultMilkProduction)
+  SetInputDialogStartText(gCore.gStomachHardMax)
 endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
-  gCore.gLactacidMultMilkProduction = fValue
+  gCore.gStomachHardMax = fValue
   SetInputOptionValueST(fValue)
 endEvent
 
 endState
-;-------------------------------
-state SetLactacidAddMilkCapacity
+;-------
+state SetStomachDecayTime
 
 event OnInputOpenST()
-  SetInputDialogStartText(gCore.gLactacidAddMilkCapacity)
+  SetInputDialogStartText(gCore.gStomachAbsorbTime)
 endEvent
 
 event OnInputAcceptST(string pValue)
   float fValue = pValue as float
-  gCore.gLactacidAddMilkCapacity = fValue
-  SetInputOptionValueST(fValue)
-endEvent
-
-endState
-;---------------------------------
-state SetLactacidAddMilkProduction
-
-event OnInputOpenST()
-  SetInputDialogStartText(gCore.gLactacidAddMilkProduction)
-endEvent
-
-event OnInputAcceptST(string pValue)
-  float fValue = pValue as float
-  gCore.gLactacidAddMilkProduction = fValue
+  gCore.gStomachAbsorbTime = fValue
   SetInputOptionValueST(fValue)
 endEvent
 
@@ -747,19 +1091,45 @@ event OnInputAcceptST(string pValue)
 endEvent
 
 endState
-;-------
-state ToggleDebugPregnant
+;-----------------
+state SetDebugStomach
 
-event OnSelectST()
-  int iValue = JValue_solveInt(gDebugObj, gCore.cPregnant)
-  if iValue == 0
-    iValue = 1
-  else
-    iValue = 0
-  endIf
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cStomach))
+endEvent
 
-  JValue_solveIntSetter(gDebugObj, gCore.cPregnant, iValue)
-  SetToggleOptionValueST(iValue == 1)
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cStomach, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------
+state SetDebugGameTime
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cGameTime))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cGameTime, fValue)
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
+;-----------------
+state SetDebugPregnant
+
+event OnInputOpenST()
+  SetInputDialogStartText(JValue_solveFlt(gDebugObj, gCore.cPregnant))
+endEvent
+
+event OnInputAcceptST(string pValue) 
+  float fValue = pValue as float
+  JValue_solveFltSetter(gDebugObj, gCore.cPregnant, fValue)
+  SetInputOptionValueST(fValue)
 endEvent
 
 endState
@@ -771,6 +1141,7 @@ event OnSelectST()
 endEvent
 
 endState
+;-------
 ;
 ; Utils
 ;

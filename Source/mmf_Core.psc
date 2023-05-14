@@ -7,43 +7,61 @@ scriptName mmf_Core extends ReferenceAlias
 ; properties set by game engine
 FormList property gTrackingList auto
 Spell property gMilktrackerSpell auto
+GlobalVariable property gGameTime auto
 
 ; public read only constants
 string property cBASE = "mmf" autoReadOnly
-string property cLEVEL = ".slider.level" autoReadOnly
-string property cFILL = ".slider.fill" autoReadOnly
-string property cSTOMACH = ".slider.stomach" autoReadOnly
-string property cPAD = ".slider.pad" autoReadOnly
+
+string property cMILK_CAPACITY_SLIDER = ".slider.milk-capacity" autoReadOnly
+string property cMILK_FILLING_SLIDER = ".slider.milk-filling" autoReadOnly
+string property cSTOMACH_SLIDER = ".slider.stomach" autoReadOnly
+string property cLACTACID_SLIDER = ".slider.lactacid" autoReadOnly
 
 ; public restricted read only constants
 string property cMilk = ".milk" autoReadOnly
 string property cProduction = ".production" autoReadOnly
 string property cCapacity = ".capacity" autoReadOnly
+string property cStomach = ".stomach" autoReadOnly
 string property cLactacid = ".lactacid" autoReadOnly
 string property cPregnant = ".pregnant" autoReadOnly
+string property cGameTime = ".gametime" autoReadOnly
 
 ; public restricted variables (must be initialized at init)
 float property gMilkProductionSoftMin auto
 float property gMilkProductionHardMin auto
 float property gMilkProductionSoftMax auto
 float property gMilkProductionHardMax auto
+float property gMilkProductionDecayTime auto
+float property gMilkProductionGrowMilking auto
+float property gMilkProductionGrowLactacid auto
+float property gMilkProductionGrowPregnant auto
+float property gMilkProductionBuffAddLactacid auto
+float property gMilkProductionBuffAddPregnant auto
+float property gMilkProductionBuffMultLactacid auto
+float property gMilkProductionBuffMultPregnant auto
 
 float property gMilkCapacitySoftMin auto
 float property gMilkCapacityHardMin auto
 float property gMilkCapacitySoftMax auto
 float property gMilkCapacityHardMax auto
-
-float property gLactacidDecayTime auto
-float property gLactacidDecayMilkProduction auto
-
-float property gLactacidMultMilkCapacity auto
-float property gLactacidMultMilkProduction auto
-
-float property gLactacidAddMilkProduction auto
-float property gLactacidAddMilkCapacity auto
+float property gMilkCapacityGrowFill auto
+float property gMilkCapacityGrowMilking auto
+float property gMilkCapacityGrowPregnant auto
+float property gMilkCapacityGrowLactacid auto
+float property gMilkCapacityBuffAddPregnant auto
+float property gMilkCapacityBuffMultPregnant auto
+float property gMilkCapacityBuffAddLactacid auto
+float property gMilkCapacityBuffMultLactacid auto
+float property gMilkCapacityDecayTime auto
 
 float property gLactacidSoftMax auto
 float property gLactacidHardMax auto
+float property gLactacidDecayTime auto
+float property gLactacidDecayMilkProduction auto
+
+float property gStomachSoftMax auto
+float property gStomachHardMax auto
+float property gStomachAbsorbTime auto
 
 ; local global variables
 int gSelectKey = 9
@@ -53,23 +71,37 @@ string cOptionMilkProductionSoftMin = ".option.milk.production.min.soft"
 string cOptionMilkProductionHardMin = ".option.milk.production.min.hard"
 string cOptionMilkProductionSoftMax = ".option.milk.production.max.soft"
 string cOptionMilkProductionHardMax = ".option.milk.production.max.hard"
+string cOptionMilkProductionDecayTime = ".option.milk.production.decay.time"
+string cOptionMilkProductionGrowMilking = ".option.milk.production.grow.milking"
+string cOptionMilkProductionGrowLactacid = ".option.milk.production.grow.lactactid"
+string cOptionMilkProductionGrowPregnant = ".option.milk.production.grow.pregnant"
+string cOptionMilkProductionBuffAddLactacid = ".option.milk.production.buff.add.lactacid"
+string cOptionMilkProductionBuffAddPregnant = ".option.milk.production.buff.add.pregnant"
+string cOptionMilkProductionBuffMultLactacid = ".option.milk.production.buff.mult.lactacid"
+string cOptionMilkProductionBuffMultPregnant = ".option.milk.production.buff.mult.pregnant"
 
 string cOptionMilkCapacitySoftMin = ".option.milk.capacity.min.soft"
 string cOptionMilkCapacityHardMin = ".option.milk.capacity.min.hard"
 string cOptionMilkCapacitySoftMax = ".option.milk.capacity.max.soft"
 string cOptionMilkCapacityHardMax = ".option.milk.capacity.max.hard"
-
-string cOptionLactacidDecayTime = ".option.lactacid.decay.time"
-string cOptionLactacidDecayMilkProdution = ".option.lactacid.decay.milk-production"
-
-string cOptionLactacidMultMilkCapacity = ".option.lactacid.mult.capacity"
-string cOptionLactacidMultMilkProduction = ".option.lactacid.mult.milk.production"
-
-string cOptionLactacidAddMilkProduction = ".option.lactacid.add.milk.production"
-string cOptionLactacidAddMilkCapacity = ".option.lactacid.add.milk.capacity"
+string cOptionMilkCapacityDecayTime = ".optiion.milk.capacity.decay.time"
+string cOptionMilkCapacityGrowFill = ".option.milk.capacity.grow.fill"
+string cOptionMilkCapacityGrowMilking = ".option.milk.capacity.grow.milking"
+string cOptionMilkCapacityGrowLactacid = ".option.milk.capacity.grow.lactacid"
+string cOptionMilkCapacityGrowPregnant = ".option.milk.capacity.grow.pregnant"
+string cOptionMilkCapacityBuffAddLactacid = ".option.milk.capacity.buff.add.lactacid"
+string cOptionMilkCapacityBuffAddPregnant = ".option.milk.capacity.buff.add.pregnant"
+string cOptionMilkCapacityBuffMultLactacid = ".option.milk.capacity.buff.mult.lactacid"
+string cOptionMilkCapacityBuffMultPregnant = ".option.milk.capacity.buff.mult.pregnant"
 
 string cOptionLactacidSoftMax = ".option.lactacid.max.soft"
 string cOptionLactacidHardMax = ".option.lactacid.max.hard"
+string cOptionLactacidDecayTime = ".option.lactacid.decay.time"
+string cOptionLactacidDecayMilkProdution = ".option.lactacid.decay.milk-production"
+
+string cOptionStomachSoftMax = ".option.stomach.max.soft"
+string cOptionStomachHardMax = ".option.stomach.max.hard"
+string cOptionStomachDecayTime = ".option.stomach.decay.time"
 
 string[] gSliderLevelName
 float[] gSliderLevelLow
@@ -87,12 +119,27 @@ string[] gSliderPadName
 float[] gSliderPadLow
 float[] gSliderPadHigh
 
+float gNextUpdateTime = 5.0
+float gLastGameTime
+
 import mmf_Debug
 import mmf_Domain
+
+function registerNextUpdate()
+  gNextUpdateTime += Utility.RandomFloat(2.0, 7.0)
+  if gNextUpdateTime > 10.0
+    gNextUpdateTime -= 5
+  endIf
+
+  LogSrcFunc("core", "registerNextUpdate", gNextUpdateTime)
+  RegisterForSingleUpdate(gNextUpdateTime)
+endFunction
 
 event OnInit()
   LogSrc("mmf_Core", "OnInit")
   ; JValue_enableAPILog(true)
+
+  registerNextUpdate()
 
   ReadOptionsFromFile()
 
@@ -101,14 +148,33 @@ event OnInit()
   endIf
 endEvent
 
+event OnPlayerLoadGame()
+  registerNextUpdate()
+endEvent
+
+event OnUpdate()
+  float now = gGameTime.GetValue()
+  if gLastGameTime == 0.0 
+    gLastGameTime = now
+  else
+    float delta = now - gLastGameTime
+    LogSrc("mcm_core", "[OnUpdate]delta=" + delta)
+    gLastGameTime = now
+
+    tickAllActors(now)
+  endIf
+
+  registerNextUpdate()
+endEvent
+
 string[] function GetSliderNames(string pGroup)
-  if pGroup == cLEVEL
+  if pGroup == cMILK_CAPACITY_SLIDER
     return gSliderLevelName
-  elseif pGroup == cFILL
+  elseif pGroup == cMILK_FILLING_SLIDER
     return gSliderFillName
-  elseif pGroup == cSTOMACH
+  elseif pGroup == cSTOMACH_SLIDER
     return gSliderStomachName
-  elseif pGroup == cPAD
+  elseif pGroup == cLACTACID_SLIDER
     return gSliderPadName
   endif
   
@@ -116,13 +182,13 @@ string[] function GetSliderNames(string pGroup)
 endFunction
 
 float[] function GetSliderLow(string pGroup)
-  if pGroup == cLEVEL
+  if pGroup == cMILK_CAPACITY_SLIDER
     return gSliderLevelLow
-  elseif pGroup == cFILL
+  elseif pGroup == cMILK_FILLING_SLIDER
     return gSliderFillLow
-  elseif pGroup == cSTOMACH
+  elseif pGroup == cSTOMACH_SLIDER
     return gSliderStomachLow
-  elseif pGroup == cPAD
+  elseif pGroup == cLACTACID_SLIDER
     return gSliderPadLow
   endif
 
@@ -130,13 +196,13 @@ float[] function GetSliderLow(string pGroup)
 endFunction
 
 float[] function GetSliderHigh(string pGroup)
-  if pGroup == cLEVEL
+  if pGroup == cMILK_CAPACITY_SLIDER
     return gSliderLevelHigh
-  elseif pGroup == cFILL
+  elseif pGroup == cMILK_FILLING_SLIDER
     return gSliderFillHigh
-  elseif pGroup == cSTOMACH
+  elseif pGroup == cSTOMACH_SLIDER
     return gSliderStomachHigh
-  elseif pGroup == cPAD
+  elseif pGroup == cLACTACID_SLIDER
     return gSliderPadHigh
   endif
 
@@ -144,10 +210,10 @@ float[] function GetSliderHigh(string pGroup)
 endFunction
 
 bool function isValidSliderGroup(string pGroup) 
-  return pGroup == cLEVEL || \
-  pGroup == cFILL || \
-  pGroup == cSTOMACH || \
-  pGroup == cPAD
+  return pGroup == cMILK_CAPACITY_SLIDER || \
+  pGroup == cMILK_FILLING_SLIDER || \
+  pGroup == cSTOMACH_SLIDER || \
+  pGroup == cLACTACID_SLIDER
 endFunction
 
 bool function AddSlider(string pGroup, string pName, float pLow, float pHigh)
@@ -216,13 +282,13 @@ bool function addSliderByGroup(string pGroup, string pName, float pLow, float pH
 endFunction
 
 string[] function getSliderNameByGroup(string pGroup)
-  if pGroup == cFILL
+  if pGroup == cMILK_FILLING_SLIDER
     return gSliderFillName
-  elseIf pGroup == cLEVEL
+  elseIf pGroup == cMILK_CAPACITY_SLIDER
     return gSliderLevelName
-  elseIf pGroup == cSTOMACH
+  elseIf pGroup == cSTOMACH_SLIDER
     return gSliderStomachName
-  elseIf pGroup == cPAD
+  elseIf pGroup == cLACTACID_SLIDER
     return gSliderPadName
   endIf
 
@@ -230,16 +296,16 @@ string[] function getSliderNameByGroup(string pGroup)
 endFunction
 
 function setSliderNameByGroup(string pGroup, string[] pNames)
-  if pGroup == cFILL
+  if pGroup == cMILK_FILLING_SLIDER
     gSliderFillName = pNames
     return
-  elseIf pGroup == cLEVEL
+  elseIf pGroup == cMILK_CAPACITY_SLIDER
     gSliderLevelName = pNames
     return
-  elseIf pGroup == cSTOMACH
+  elseIf pGroup == cSTOMACH_SLIDER
     gSliderStomachName = pNames
     return
-  elseIf pGroup == cPAD
+  elseIf pGroup == cLACTACID_SLIDER
     gSliderPadName = pNames
     return
   endIf
@@ -248,13 +314,13 @@ function setSliderNameByGroup(string pGroup, string[] pNames)
 endFunction
 
 float[] function getSliderLowByGroup(string pType)
-  if pType == cFILL
+  if pType == cMILK_FILLING_SLIDER
     return gSliderFillLow
-  elseIf pType == cLEVEL
+  elseIf pType == cMILK_CAPACITY_SLIDER
     return gSliderLevelLow
-  elseIf pType == cSTOMACH
+  elseIf pType == cSTOMACH_SLIDER
     return gSliderStomachLow
-  elseIf pType == cPAD
+  elseIf pType == cLACTACID_SLIDER
     return gSliderPadLow
   endIf
 
@@ -262,16 +328,16 @@ float[] function getSliderLowByGroup(string pType)
 endFunction
 
 function setSliderLowByGroup(string pGroup, float[] pLow)
-  if pGroup == cFILL
+  if pGroup == cMILK_FILLING_SLIDER
     gSliderFillLow = pLow
     return
-  elseIf pGroup == cLEVEL
+  elseIf pGroup == cMILK_CAPACITY_SLIDER
     gSliderLevelLow = pLow
     return
-  elseIf pGroup == cSTOMACH
+  elseIf pGroup == cSTOMACH_SLIDER
     gSliderStomachLow = pLow
     return
-  elseIf pGroup == cPAD
+  elseIf pGroup == cLACTACID_SLIDER
     gSliderPadLow = pLow
     return
   endIf
@@ -280,13 +346,13 @@ function setSliderLowByGroup(string pGroup, float[] pLow)
 endFunction
 
 float[] function getSliderHighByGroup(string pGroup)
-  if pGroup == cFILL
+  if pGroup == cMILK_FILLING_SLIDER
     return gSliderFillHigh
-  elseIf pGroup == cLEVEL
+  elseIf pGroup == cMILK_CAPACITY_SLIDER
     return gSliderLevelHigh
-  elseIf pGroup == cSTOMACH
+  elseIf pGroup == cSTOMACH_SLIDER
     return gSliderStomachHigh
-  elseIf pGroup == cPAD
+  elseIf pGroup == cLACTACID_SLIDER
     return gSliderPadHigh
   endIf
 
@@ -294,16 +360,16 @@ float[] function getSliderHighByGroup(string pGroup)
 endFunction
 
 function setSliderHighByGroup(string pGroup, float[] pHigh)
-  if pGroup == cFILL
+  if pGroup == cMILK_FILLING_SLIDER
     gSliderFillHigh = pHigh
     return
-  elseIf pGroup == cLEVEL
+  elseIf pGroup == cMILK_CAPACITY_SLIDER
     gSliderLevelHigh = pHigh
     return
-  elseIf pGroup == cSTOMACH
+  elseIf pGroup == cSTOMACH_SLIDER
     gSliderStomachHigh = pHigh
     return
-  elseIf pGroup == cPAD
+  elseIf pGroup == cLACTACID_SLIDER
     gSliderPadHigh = pHigh
     return
   endIf
@@ -448,9 +514,9 @@ event OnKeyUp(int pKeyCode, float pHoldTime)
 
 endEvent
 
-;--
+;---------------
 ; Actor Tracking
-;--
+;---------------
 
 function AddTrackingActor(Actor pActor)
   int id = pActor.GetFormID()
@@ -468,7 +534,10 @@ function AddTrackingActor(Actor pActor)
   JValue_solveFltSetter(obj, cProduction, gMilkProductionSoftMin, true)
   JValue_solveFltSetter(obj, cCapacity, gMilkCapacitySoftMin, true)
   JValue_solveFltSetter(obj, cLactacid, 0.0, true)
-  JValue_solveIntSetter(obj, cPregnant, 0, true)
+  JValue_solveFltSetter(obj, cStomach, 0.0, true)
+  JValue_solveFltSetter(obj, cPregnant, 0.0, true)
+  JValue_solveFltSetter(obj, cGameTime, gGameTime.GetValue(), true)
+
   gTrackingList.AddForm(pActor)
   updateActor(pActor)
 endFunction
@@ -525,12 +594,14 @@ function updateActor(Actor pActor)
   float milk = JValue_solveFlt(obj, cMilk)
   float capacity = JValue_solveFlt(obj, cCapacity)
   float lactacid = JValue_solveFlt(obj, cLactacid)
+  float stomach = JValue_solveFlt(obj, cStomach)
 
   float capacityScale = gMilkCapacitySoftMax - gMilkCapacitySoftMin
 
   float normMilk = 0.0
   float normCapacity = 0.0
   float normLactacid = 0.0
+  float normStomach = 0.0
 
   if capacity > 0.0
     normMilk = fltMinMax(milk / capacity, 0.0, 1.0)
@@ -544,16 +615,21 @@ function updateActor(Actor pActor)
     normLactacid = fltMinMax(lactacid / gLactacidSoftMax, 0.0, 1.0)
   endIf
 
-  updateActorSlider(pActor, normMilk, cFILL)
-  updateActorSlider(pActor, normCapacity, cLEVEL)
-  updateActorSlider(pActor, normLactacid, cPAD)
+  if gStomachSoftMax > 0.0
+    normStomach = fltMinMax(stomach / gStomachSoftMax, 0.0, 1.0)
+  endIf
+
+  updateActorSlider(pActor, normMilk, cMILK_FILLING_SLIDER)
+  updateActorSlider(pActor, normCapacity, cMILK_CAPACITY_SLIDER)
+  updateActorSlider(pActor, normLactacid, cLACTACID_SLIDER)
+  updateActorSlider(pActor, normStomach, cSTOMACH_SLIDER)
   NiOverride.UpdateModelWeight(pActor)
 endFunction
 
 function cleanActor(Actor pActor)
-  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cFILL)
-  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cLEVEL)
-  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cPAD)
+  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cMILK_FILLING_SLIDER)
+  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cMILK_CAPACITY_SLIDER)
+  NiOverride.ClearBodyMorphKeys(pActor, cBASE + cLACTACID_SLIDER)
   NiOverride.UpdateModelWeight(pActor)
 endFunction
 
@@ -575,6 +651,258 @@ function UpdateActorByIndex(int pIndex)
     updateActor(act)
   endIf
 endFunction
+
+bool function tickActor(Actor pActor, float pNow)
+  LogSrcFunc("core", "tickActor", "Begin with Actor=" + pActor)
+  int obj = JFormDB_findEntry(cBASE, pActor)
+  if obj == 0
+    LogSrcFunc("core", "tickActor", "JContainer not found exit")
+    return false
+  endIf
+
+  float gameTime = JValue_solveFlt(obj, cGameTime)
+  if gameTime > pNow ; well something is not right
+    LogSrcFunc("core", "tickActor", "gameTime="+gameTime+" > pNow="+pNow)
+    JValue_solveFltSetter(obj, cGameTime, pNow)
+    return true
+  endIf
+
+  float delta = pNow - gameTime
+  LogSrcFunc("core", "tickActor", "delta=" + delta)
+
+  ; if delta < (1.0/(24.0*4))
+  ;   return true
+  ; endIf
+
+  float stomach = fltMinMax(JValue_solveFlt(obj, cStomach), 0.0, gStomachHardMax)
+  float lactacid = fltMinMax(JValue_solveFlt(obj, cLactacid), 0.0, gLactacidHardMax)
+  float milk = fltMinMax(JValue_solveFlt(obj, cMilk), 0.0, gMilkCapacityHardMax)
+  float capacity = fltMinMax(JValue_solveFlt(obj, cCapacity), gMilkCapacityHardMin, gMilkCapacityHardMax)
+  float production = fltMinMax(JValue_solveFlt(obj, cProduction), gMilkProductionHardMax, gMilkProductionHardMax)
+  float pregnant = fltMinMax(JValue_solveFlt(obj, cPregnant), 0.0, 1.0)
+
+  LogSrcFunc("core", "tickActor", \
+    "start:" + pActor + "\n" + \
+    "stomach="+stomach + "\n" + \
+    "lactacid="+lactacid + "\n" + \
+    "milk="+milk + "\n" + \
+    "capacity="+capacity + "\n" + \
+    "production="+production)
+
+  float capacityMod = capacity
+  float add = 0.0
+  float sub = 0.0
+  ; Mod Capacity by Pregnancy
+  if pregnant > 0.0
+    add = gMilkCapacityBuffAddPregnant * pregnant
+    add += capacity * gMilkCapacityBuffMultPregnant * pregnant
+    LogSrcFunc("core", "tickActor", "capacityMod(pregnant)+="+add)
+    
+    capacityMod += add
+  endIf
+
+  ; Mod Capacity by Lactacid
+  if lactacid > 0.0
+    float fillLactacid = lactacid / gLactacidSoftMax
+    if fillLactacid > 1.0
+      fillLactacid = 1.0
+    endIf
+
+    add = fillLactacid * gMilkCapacityBuffAddLactacid
+    add += capacity * fillLactacid * gMilkCapacityBuffMultLactacid
+
+    LogSrcFunc("core", "tickActor", "capacityMod(lactacid)+="+add)
+    capacityMod += add
+  endIf
+
+  if capacityMod > gMilkCapacityHardMax
+    capacityMod = gMilkCapacityHardMax
+  endIf
+  LogSrcFunc("core", "tickActor", "capacityMod="+capacityMod)
+
+  ; Convert Stomach to Lactacid
+  if stomach > 0.0
+    float leftSpace = gLactacidHardMax - lactacid
+    float potential = gStomachAbsorbTime * delta
+
+    if leftSpace < potential 
+      potential = leftSpace
+    endIf
+
+    LogSrcFunc("core", "tickActor", "lactacid(stomach)+="+potential)
+
+    lactacid += potential
+    stomach -= potential
+  endIf
+
+  float overshoot = 0.0
+
+  ; Milk Prduction
+  if production > 0.0
+    float leftSpace = capacityMod - milk
+    float potential = production * delta
+
+    if lactacid > 0.0
+      float lactacidWorkPotential = lactacid / (gLactacidDecayMilkProduction * delta)
+
+      if lactacidWorkPotential > 1.0
+        lactacidWorkPotential = 1.0
+      endIf
+
+      add = production * delta * gMilkProductionBuffMultLactacid
+      add += (production+gMilkProductionBuffAddLactacid) * delta
+      LogSrcFunc("core", "tickActor", "milk(lactacid)+=" + add)
+      potential += add
+
+      sub = lactacidWorkPotential * gLactacidDecayMilkProduction
+      LogSrcFunc("core", "tickActor", "lactacid(production)-=" + sub)
+
+      lactacid -= sub
+    endIf
+
+    if pregnant > 0.0
+      add = production * delta * gMilkProductionBuffMultPregnant * pregnant
+      add += (production+gMilkProductionBuffAddPregnant) * delta * pregnant
+      LogSrcFunc("core", "tickActor", "milk(pregnant)+=" + add)
+      potential += add
+    endIf
+
+    if leftSpace < potential
+      overshoot += potential - leftSpace
+      potential = leftSpace
+    endIf
+
+    milk += potential
+  endIf
+
+  ; Milk Production Grow by Lactacid
+  if lactacid > 0.0
+    float lactacidFill = lactacid / gLactacidSoftMax
+    
+    if lactacidFill > 1.0 
+      lactacidFill = 1.0
+    endIf
+
+    add = lactacidFill * delta * gMilkProductionGrowLactacid
+    LogSrcFunc("core", "tickActor", "production(lactacid)+="+ add)
+    production += add
+
+    if production > gMilkProductionHardMax
+      production = gMilkCapacityHardMax
+    endIf
+  endIf
+
+  ; Milk Production Grow by Pregnancy
+  if pregnant > 0.0
+    add = delta * gMilkProductionGrowPregnant * pregnant
+    LogSrcFunc("core", "tickActor", "production(pregnant)+=" + add)
+    production += add
+
+    if production > gMilkProductionHardMax
+      production = gMilkCapacityHardMax
+    endIf
+  endIf
+
+  ; Milk Production Decay by Time
+  if production > 0.0
+    sub = delta * gMilkProductionDecayTime
+    LogSrcFunc("core","tickActor", "prodution(time)-=" + sub)
+    production -= sub
+    
+    if production < gMilkProductionHardMin
+      production = gMilkProductionHardMin
+    endIf
+  endIf
+
+  ; Milk Capacity Grow by Filling
+  if milk > 0.0
+    float milkFill = milk / gMilkCapacitySoftMax
+
+    if milkFill > 1.0
+      milkFill = 1.0
+    endIf
+
+    add = milkFill * delta * gMilkCapacityGrowFill
+    LogSrcFunc("core", "tickActor", "capacity(fill)+=" + add)
+
+    capacity += add
+  endIf
+
+  ; Milk Capacity Grow by Pregnancy
+  if pregnant > 0.0
+    add = gMilkCapacityGrowPregnant * delta * pregnant
+    LogSrcFunc("core", "tickActor", "capacity(pregnant)+=" + add)
+    capacity += add
+  endIf
+
+  ; Milk Capacity Decay by Time
+  if capacity > gMilkCapacityHardMin
+    sub = gMilkCapacityDecayTime * delta
+    LogSrcFunc("core", "tickActor", "capacity(time)-=" + sub)
+    capacity -= sub
+    if capacity < gMilkCapacityHardMin
+      capacity = gMilkCapacityHardMin
+    endIf
+  endIf
+
+  if capacity > gMilkCapacityHardMax
+    capacity = gMilkCapacityHardMax
+  endIf
+
+  ; Lactacid Time Decay
+  if lactacid > 0.0
+    sub = delta * gLactacidDecayTime
+    if sub > lactacid 
+      sub = lactacid
+    endIf
+
+    LogSrcFunc("core","tickActor", "lactacid(time)-=" + sub)
+    lactacid -= sub
+  endIf
+
+  stomach = fltMinMax(stomach, 0.0, gStomachHardMax)
+  lactacid = fltMinMax(lactacid, 0.0, gLactacidHardMax)
+  capacity = fltMinMax(capacity, gMilkCapacityHardMin, gMilkCapacityHardMax)
+  milk = fltMinMax(milk, 0.0, gMilkCapacityHardMax)
+
+  LogSrcFunc("core", "tickActor", \
+    "end:" + pActor + "\n" + \
+    "stomach="+stomach + "\n" + \
+    "lactacid="+lactacid + "\n" + \
+    "milk="+milk + "\n" + \
+    "capacity="+capacity + "\n" + \
+    "production="+production)
+
+  JValue_solveFltSetter(obj, cStomach, stomach)
+  JValue_solveFltSetter(obj, cLactacid, lactacid)
+  JValue_solveFltSetter(obj, cMilk, milk)
+  JValue_solveFltSetter(obj, cCapacity, capacity)
+  JValue_solveFltSetter(obj, cProduction, production)
+  JValue_solveFltSetter(obj, cGameTime, pNow)
+
+  updateActor(pActor)
+
+  return true
+endFunction
+
+function tickAllActors(float pNow)
+  int index = gTrackingList.GetSize() - 1
+
+  LogSrc("mmf_Core", "[tickAllActors]:index="+index)
+  while index >= 0
+    Actor act = gTrackingList.GetAt(index) as Actor
+    
+    if act != None 
+      if !tickActor(act, pNow)
+        gTrackingList.RemoveAddedForm(act)
+        index = gTrackingList.GetSize()
+      endIf
+    endIf
+
+    index -=1
+  endWhile
+endFunction
+
 ;---
 ;
 ;---
@@ -605,19 +933,19 @@ function ReadOptionsSlidersFromObj(int obj, string pName)
       index += 1
     endWhile
 
-    if pName == cFILL
+    if pName == cMILK_FILLING_SLIDER
       gSliderFillName = sliderName
       gSliderFillLow = sliderLow
       gSliderFillHigh = sliderHigh
-    elseif pName == cLEVEL
+    elseif pName == cMILK_CAPACITY_SLIDER
       gSliderLevelName = sliderName
       gSliderLevelLow = sliderLow
       gSliderLevelHigh = sliderHigh
-    elseif pName == cSTOMACH
+    elseif pName == cSTOMACH_SLIDER
       gSliderStomachName = sliderName
       gSliderStomachLow = sliderLow
       gSliderStomachHigh = sliderHigh
-    elseif pName == cPAD
+    elseif pName == cLACTACID_SLIDER
       gSliderPadName = sliderName
       gSliderPadLow = sliderLow
       gSliderPadHigh = sliderHigh
@@ -632,29 +960,41 @@ function ReadOptionsFromFile()
 
   gMilkCapacitySoftMin = JValue_solveFlt(obj, cOptionMilkCapacitySoftMin, 1.0)
   gMilkCapacityHardMin = JValue_solveFlt(obj, cOptionMilkCapacityHardMin, 0.5)
-
   gMilkCapacitySoftMax = JValue_solveFlt(obj, cOptionMilkCapacitySoftMax, 8.0)
   gMilkCapacityHardMax = JValue_solveFlt(obj , cOptionMilkCapacityHardMax, 10.0)
-  
+  gMilkCapacityBuffAddLactacid = JValue_solveFlt(obj, cOptionMilkCapacityBuffAddLactacid, 0.1)
+  gMilkCapacityBuffAddPregnant = JValue_solveFlt(obj, cOptionMilkCapacityBuffAddPregnant, 1.0)
+  gMilkCapacityBuffMultLactacid = JValue_solveFlt(obj, cOptionMilkCapacityBuffMultLactacid, 0.1)
+  gMilkCapacityBuffMultPregnant = JValue_solveFlt(obj, cOptionMilkCapacityBuffMultPregnant, 1.0)
+  gMilkCapacityGrowFill = JValue_solveFlt(obj, cOptionMilkCapacityGrowFill, 0.1)
+  gMilkCapacityGrowMilking = JValue_solveFlt(obj, cOptionMilkCapacityGrowMilking, 0.1)
+  gMilkCapacityGrowLactacid = JValue_solveFlt(obj, cOptionMilkCapacityGrowLactacid, 0.01)
+  gMilkCapacityGrowPregnant = JValue_solveFlt(obj, cOptionMilkCapacityGrowPregnant, 0.2)
+  gMilkCapacityDecayTime = JValue_solveFlt(obj, cOptionMilkCapacityDecayTime, 0.1)
 
   gMilkProductionSoftMin = JValue_solveFlt(obj, cOptionMilkProductionSoftMin, 0.1)
   gMilkProductionHardMin = JValue_solveFlt(obj, cOptionMilkProductionHardMin, 0.0)
-
   gMilkProductionSoftMax = JValue_solveFlt(obj, cOptionMilkProductionSoftMax, 8.0)
   gMilkProductionHardMax = JValue_solveFlt(obj, cOptionMilkProductionHardMax, 10.0)
+  gMilkProductionDecayTime = JValue_solveFlt(obj, cOptionMilkCapacityDecayTime, 0.1)
+  gMilkProductionGrowMilking = JValue_solveFlt(obj, cOptionMilkProductionGrowMilking, 0.05)
+  gMilkProductionGrowLactacid = JValue_solveFlt(obj, cOptionMilkProductionGrowLactacid, 0.005)
+  gMilkProductionGrowPregnant = JValue_solveFlt(obj, cOptionMilkProductionGrowPregnant, 0.1)
+  gMilkProductionBuffAddLactacid = JValue_solveFlt(obj, cOptionMilkProductionBuffAddLactacid, 0.0)
+  gMilkProductionBuffAddPregnant = JValue_solveFlt(obj, cOptionMilkProductionBuffAddPregnant, 0.1)
+  gMilkProductionBuffMultLactacid = JValue_solveFlt(obj, cOptionMilkProductionBuffMultLactacid, 0.2)
+  gMilkProductionBuffMultPregnant = JValue_solveFlt(obj, cOptionMilkProductionBuffMultPregnant, 0.5)
 
 
   gLactacidSoftMax = JValue_solveFlt(obj, cOptionLactacidSoftMax, 8.0)
   gLactacidHardMax = JValue_solveFlt(obj, cOptionLactacidHardMax, 8.0)
-
   gLactacidDecayTime = JValue_solveFlt(obj, cOptionLactacidDecayTime, 1.0)
   gLactacidDecayMilkProduction = JValue_solveFlt(obj, cOptionLactacidDecayMilkProdution, 0.25)
 
-  gLactacidMultMilkCapacity = JValue_solveFlt(obj, cOptionLactacidMultMilkCapacity, 0.03)
-  gLactacidMultMilkProduction = JValue_solveFlt(obj, cOptionLactacidMultMilkProduction, 0.5)
 
-  gLactacidAddMilkCapacity = JValue_solveFlt(obj, cOptionLactacidAddMilkCapacity, 0.0)
-  gLactacidAddMilkProduction = JValue_solveFlt(obj, cOptionLactacidAddMilkProduction, 0.0)
+  gStomachSoftMax = JValue_solveFlt(obj, cOptionStomachSoftMax, 80.0)
+  gStomachHardMax = JValue_solveFlt(obj, cOptionStomachHardMax, 100.0)
+  gStomachAbsorbTime = JValue_solveFlt(obj, cOptionStomachDecayTime, 150.0)
 
   string[] sliderName = Utility.CreateStringArray(0)
   float[] sliderLow = Utility.CreateFloatArray(0)
@@ -662,10 +1002,10 @@ function ReadOptionsFromFile()
 
   int arr = 0
   
-  ReadOptionsSlidersFromObj(obj, cLEVEL)
-  ReadOptionsSlidersFromObj(obj, cFILL)
-  ReadOptionsSlidersFromObj(obj, cSTOMACH)
-  ReadOptionsSlidersFromObj(obj, cPAD)
+  ReadOptionsSlidersFromObj(obj, cMILK_CAPACITY_SLIDER)
+  ReadOptionsSlidersFromObj(obj, cMILK_FILLING_SLIDER)
+  ReadOptionsSlidersFromObj(obj, cSTOMACH_SLIDER)
+  ReadOptionsSlidersFromObj(obj, cLACTACID_SLIDER)
 
   JValue_zeroLifetime(obj)
 endFunction
@@ -700,38 +1040,50 @@ function WriteOptionsToFile()
     Fatal("couldn't create JMap_object")
     return
   endIf
-
+  
   JValue_solveFltSetter(obj, cOptionMilkCapacitySoftMin, gMilkCapacitySoftMin, true)
   JValue_solveFltSetter(obj, cOptionMilkCapacityHardMin, gMilkCapacityHardMin, true)
-
   JValue_solveFltSetter(obj, cOptionMilkCapacitySoftMax, gMilkCapacitySoftMax, true)
   JValue_solveFltSetter(obj, cOptionMilkCapacityHardMax, gMilkCapacityHardMax, true)
-
+  JValue_solveFltSetter(obj, cOptionMilkCapacityDecayTime, gMilkCapacityDecayTime, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityGrowFill, gMilkCapacityGrowFill, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityGrowMilking, gMilkCapacityGrowMilking, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityGrowLactacid, gMilkCapacityGrowLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityGrowPregnant, gMilkCapacityGrowPregnant, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityBuffAddLactacid, gMilkCapacityBuffAddLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityBuffAddPregnant, gMilkCapacityBuffAddPregnant, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityBuffMultLactacid, gMilkCapacityBuffMultLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkCapacityBuffMultPregnant, gMilkCapacityBuffMultPregnant, true)
+  
 
   JValue_solveFltSetter(obj, cOptionMilkProductionSoftMin, gMilkProductionSoftMin, true)
-  JValue_solveFltSetter(obj, cOptionMilkProductionSoftMax, gMilkProductionSoftMax, true)
-
+  JValue_solveFltSetter(obj, cOptionMilkProductionHardMin, gMilkProductionHardMin, true)
   JValue_solveFltSetter(obj, cOptionMilkProductionSoftMax, gMilkProductionSoftMax, true)
   JValue_solveFltSetter(obj, cOptionMilkProductionHardMax, gMilkProductionHardMax, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionDecayTime, gMilkProductionDecayTime, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionGrowMilking, gMilkProductionGrowMilking, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionGrowLactacid, gMilkProductionGrowLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionGrowPregnant, gMilkProductionGrowPregnant, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionBuffAddLactacid, gMilkProductionBuffAddLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionBuffAddPregnant, gMilkProductionBuffAddPregnant, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionBuffMultLactacid, gMilkProductionBuffMultLactacid, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionBuffMultPregnant, gMilkProductionBuffMultPregnant, true)
 
 
   JValue_solveFltSetter(obj, cOptionLactacidSoftMax, gLactacidSoftMax, true)
   JValue_solveFltSetter(obj, cOptionLactacidHardMax, gLactacidHardMax, true)
-
   JValue_solveFltSetter(obj, cOptionLactacidDecayTime, gLactacidDecayTime, true)
   JValue_solveFltSetter(obj, cOptionLactacidDecayMilkProdution, gLactacidDecayMilkProduction, true)
 
-  JValue_solveFltSetter(obj, cOptionLactacidMultMilkCapacity, gLactacidMultMilkCapacity, true)
-  JValue_solveFltSetter(obj, cOptionLactacidMultMilkProduction, gLactacidMultMilkProduction, true)
 
-  JValue_solveFltSetter(obj, cOptionLactacidAddMilkProduction, gLactacidAddMilkProduction, true)
-  JValue_solveFltSetter(obj, cOptionLactacidAddMilkCapacity, gLactacidAddMilkCapacity, true)
+  JValue_solveFltSetter(obj, cOptionStomachSoftMax, gStomachSoftMax, true)
+  JValue_solveFltSetter(obj, cOptionStomachHardMax, gStomachHardMax, true)
 
 
-  WriteOptionsSlidersToObj(obj, cFILL, gSliderFillName, gSliderFillLow, gSliderFillHigh)
-  WriteOptionsSlidersToObj(obj, cLEVEL, gSliderLevelName, gSliderLevelLow, gSliderLevelHigh)
-  WriteOptionsSlidersToObj(obj, cSTOMACH, gSliderStomachName, gSliderStomachLow, gSliderStomachHigh)
-  WriteOptionsSlidersToObj(obj, cPAD, gSliderPadName, gSliderPadLow, gSliderPadHigh)
+  WriteOptionsSlidersToObj(obj, cMILK_FILLING_SLIDER, gSliderFillName, gSliderFillLow, gSliderFillHigh)
+  WriteOptionsSlidersToObj(obj, cMILK_CAPACITY_SLIDER, gSliderLevelName, gSliderLevelLow, gSliderLevelHigh)
+  WriteOptionsSlidersToObj(obj, cSTOMACH_SLIDER, gSliderStomachName, gSliderStomachLow, gSliderStomachHigh)
+  WriteOptionsSlidersToObj(obj, cLACTACID_SLIDER, gSliderPadName, gSliderPadLow, gSliderPadHigh)
 
   LogSrc("mmf_Core", "to file:" + cOptionsFile)
   JValue_writeToFile(obj, cOptionsFile)
