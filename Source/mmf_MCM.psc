@@ -187,7 +187,7 @@ function DisplayPageOptions()
   AddInputOptionST("SetStomachSoftMax", "Soft Maximum", gCore.gStomachSoftMax)
   AddInputOptionST("SetStomachHardMax", "Hard Maximum", gCore.gStomachHardMax)
 
-  AddInputOptionST("SetStomachDecayTime", "Decay by Time", gCore.gStomachAbsorbTime)
+  AddInputOptionST("SetStomachAbsorbTime", "Absorb by Time", gCore.gStomachAbsorbTime)
   AddEmptyOption()
 
   AddHeaderOption("Save/Load")
@@ -987,7 +987,7 @@ endEvent
 
 endState
 ;-------
-state SetStomachDecayTime
+state SetStomachAbsorbTime
 
 event OnInputOpenST()
   SetInputDialogStartText(gCore.gStomachAbsorbTime)

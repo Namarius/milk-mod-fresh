@@ -101,7 +101,7 @@ string cOptionLactacidDecayMilkProdution = ".option.lactacid.decay.milk-producti
 
 string cOptionStomachSoftMax = ".option.stomach.max.soft"
 string cOptionStomachHardMax = ".option.stomach.max.hard"
-string cOptionStomachDecayTime = ".option.stomach.decay.time"
+string cOptionStomachAbsorbTime = ".option.stomach.absorb.time"
 
 string[] gSliderLevelName
 float[] gSliderLevelLow
@@ -994,7 +994,7 @@ function ReadOptionsFromFile()
 
   gStomachSoftMax = JValue_solveFlt(obj, cOptionStomachSoftMax, 80.0)
   gStomachHardMax = JValue_solveFlt(obj, cOptionStomachHardMax, 100.0)
-  gStomachAbsorbTime = JValue_solveFlt(obj, cOptionStomachDecayTime, 150.0)
+  gStomachAbsorbTime = JValue_solveFlt(obj, cOptionStomachAbsorbTime, 150.0)
 
   string[] sliderName = Utility.CreateStringArray(0)
   float[] sliderLow = Utility.CreateFloatArray(0)
