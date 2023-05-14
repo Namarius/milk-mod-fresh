@@ -77,12 +77,12 @@ event OnPageReset(string pPage)
     DisplayPageDebug()
     return
   elseIf pPage == ""
-    LogSrc("mmf_MCM","empty page")
+    LogSrcFunc("mcm", "OnPageReset", "empty page")
     return
   endIf
 
   Unreachable()
-  LogSrc("mmf_MCM", pPage)
+  LogSrcFunc("mcm", "OnPageReset", pPage)
 endEvent
 
 ;

@@ -9,7 +9,7 @@ event OnEffectStart(Actor pTarget, Actor pCaster)
   float dur = self.GetDuration()
   float mag = self.GetMagnitude()
 
-  LogSrc("mmf_Lactacid", "OnEffectStart:mag=" + mag + ",dur=" + dur + ",act=" + pTarget)
+  LogSrcFunc("lactacid", "OnEffectStart", "mag=" + mag + ",dur=" + dur + ",act=" + pTarget)
 
   int obj = JFormDB_findEntry(gCore.cBASE, pTarget)
   if obj == 0

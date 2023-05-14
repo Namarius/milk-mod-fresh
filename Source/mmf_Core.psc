@@ -136,7 +136,7 @@ function registerNextUpdate()
 endFunction
 
 event OnInit()
-  LogSrc("mmf_Core", "OnInit")
+  LogSrcFunc("core", "OnInit", "start")
   ; JValue_enableAPILog(true)
 
   registerNextUpdate()
@@ -158,7 +158,7 @@ event OnUpdate()
     gLastGameTime = now
   else
     float delta = now - gLastGameTime
-    LogSrc("mcm_core", "[OnUpdate]delta=" + delta)
+    LogSrcFunc("core", "OnUpdate", "delta=" + delta)
     gLastGameTime = now
 
     tickAllActors(now)
@@ -507,7 +507,7 @@ event OnKeyUp(int pKeyCode, float pHoldTime)
     Debug.MessageBox("Reference is: " + ref)
     Actor act = ref as Actor
     if act != None && !act.HasSpell(gMilktrackerSpell)
-      LogSrc("mmf_Core", "act="+act)
+      LogSrcFunc("core", "OnKeyUp", "act="+act)
       act.AddSpell(gMilktrackerSpell, false)
     endIf
   endIf
@@ -520,7 +520,7 @@ endEvent
 
 function AddTrackingActor(Actor pActor)
   int id = pActor.GetFormID()
-  LogSrc("mmf_Core", "AddTrackingActor:id=" + id)
+  LogSrcFunc("core", "AddTrackingActor", "AddTrackingActor:id=" + id)
   if id <= 0xFF000000
     return
   endIf
@@ -573,13 +573,13 @@ function updateActorSlider(Actor pActor, float pValue, string pGroup)
   float[] lows = getSliderLowByGroup(pGroup)
   float[] highs = getSliderHighByGroup(pGroup)
 
-  LogSrc("mmf_Core", "updateActorSlider:group="+pGroup+",pValue="+pValue)
+  LogSrcFunc("core", "updateActorSlider", "group=" + pGroup + ",pValue=" + pValue)
 
   int index = names.Length - 1
   float value
   while index >= 0
     value = ((highs[index] - lows[index]) * pValue) + lows[index]
-    LogSrc("mmf_Core", "updateActorSlider:actor=" + pActor + ",name=" + names[index] + ",key=" + "mmf"+pGroup + ",value=" + value)
+    LogSrcFunc("core", "updateActorSlider", "actor=" + pActor + ",name=" + names[index] + ",key=" + "mmf"+pGroup + ",value=" + value)
     NiOverride.SetBodyMorph(pActor, names[index], "mmf"+pGroup, value)
     index -= 1
   endWhile
@@ -888,7 +888,7 @@ endFunction
 function tickAllActors(float pNow)
   int index = gTrackingList.GetSize() - 1
 
-  LogSrc("mmf_Core", "[tickAllActors]:index="+index)
+  LogSrcFunc("core", "tickAllActors", "index="+index)
   while index >= 0
     Actor act = gTrackingList.GetAt(index) as Actor
     
@@ -1034,7 +1034,7 @@ endFunction
 function WriteOptionsToFile()
   int obj = JMap_object()
 
-  LogSrc("mmf_Core", "WriteOptionsToFile:obj=" + obj)
+  LogSrcFunc("core", "WriteOptionsFile", "obj=" + obj)
 
   if obj == 0
     Fatal("couldn't create JMap_object")
@@ -1085,7 +1085,7 @@ function WriteOptionsToFile()
   WriteOptionsSlidersToObj(obj, cSTOMACH_SLIDER, gSliderStomachName, gSliderStomachLow, gSliderStomachHigh)
   WriteOptionsSlidersToObj(obj, cLACTACID_SLIDER, gSliderPadName, gSliderPadLow, gSliderPadHigh)
 
-  LogSrc("mmf_Core", "to file:" + cOptionsFile)
+  LogSrcFunc("core", "WriteOptionsToFile", "to file:" + cOptionsFile)
   JValue_writeToFile(obj, cOptionsFile)
   
   JValue_zeroLifetime(obj)
