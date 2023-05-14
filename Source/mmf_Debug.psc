@@ -14,6 +14,12 @@ function LogSrc(string script, string msg) global
   CLog(s)
 endFunction
 
+function LogSrcFunc(string script, string func, string msg) global
+  string s = "[mmf:"+script+":"+func+"]" + msg
+  Debug.Trace(s)
+  CLog(s)
+endFunction
+
 function Fatal(string msg) global
   string s = "Fatal [mmf]:\n" + msg
   Debug.MessageBox(s)
