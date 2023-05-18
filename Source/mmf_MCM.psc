@@ -249,7 +249,7 @@ function updatePageDebug()
     SetInputOptionValueST("N/A", true, "SetDebugGameTime")
     
     SetOptionFlagsST(OPTION_FLAG_DISABLED, true, "SetDebugPregnant")
-    SetToggleOptionValueST(false, true, "SetDebugPregnant")
+    SetInputOptionValueST("N/A", true, "SetDebugPregnant")
   endIf
 
   if gDebugIndex <= 0
