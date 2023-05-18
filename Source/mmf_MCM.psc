@@ -321,7 +321,7 @@ function DisplayPageSliderOverview(string[] pNames, float[] pLows, float[] pHigh
   SetCursorPosition(0)
 
   AddMenuOptionST("SelectSliderPreset", "Select Slider Preset", "Female")
-  AddEmptyOption()
+  AddInputOptionST("AddSlider", "Add Slider", "")
 
   int obj = JMap_object()
   int index = 0
@@ -396,6 +396,38 @@ endEvent
 
 event OnHighlightST()
   SetInfoText("Opens menu for different Bodyslide XML Presets\nWill override all values in this list")
+endEvent
+
+endState
+;-------
+state AddSlider
+
+event OnInputOpenST()
+  SetInputDialogStartText("")
+endEvent
+
+event OnInputAcceptST(string pValue)
+  if pValue == ""
+    return
+  endIf
+
+  string[] names = gCore.GetSliderNames(gSliderGroup)
+
+  int index = names.Length - 1
+  while index >= 0
+    if names[index] == pValue
+      gSliderChangeIndex = index
+      ForcePageReset()
+      return
+    endIf
+    index -= 1
+  endWhile
+
+  gCore.AddSlider(gSliderGroup, pValue, 0.0, 0.0)
+  names = gCore.GetSliderNames(gSliderGroup)
+
+  gSliderChangeIndex = names.Length - 1
+  ForcePageReset()
 endEvent
 
 endState
