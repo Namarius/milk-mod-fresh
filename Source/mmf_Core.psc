@@ -678,7 +678,7 @@ bool function tickActor(Actor pActor, float pNow)
   float lactacid = fltMinMax(JValue_solveFlt(obj, cLactacid), 0.0, gLactacidHardMax)
   float milk = fltMinMax(JValue_solveFlt(obj, cMilk), 0.0, gMilkCapacityHardMax)
   float capacity = fltMinMax(JValue_solveFlt(obj, cCapacity), gMilkCapacityHardMin, gMilkCapacityHardMax)
-  float production = fltMinMax(JValue_solveFlt(obj, cProduction), gMilkProductionHardMax, gMilkProductionHardMax)
+  float production = fltMinMax(JValue_solveFlt(obj, cProduction), gMilkProductionHardMin, gMilkProductionHardMax)
   float pregnant = fltMinMax(JValue_solveFlt(obj, cPregnant), 0.0, 1.0)
 
   LogSrcFunc("core", "tickActor", \
@@ -864,6 +864,7 @@ bool function tickActor(Actor pActor, float pNow)
   lactacid = fltMinMax(lactacid, 0.0, gLactacidHardMax)
   capacity = fltMinMax(capacity, gMilkCapacityHardMin, gMilkCapacityHardMax)
   milk = fltMinMax(milk, 0.0, gMilkCapacityHardMax)
+  production = fltMinMax(production, gMilkProductionHardMin, gMilkProductionHardMax)
 
   LogSrcFunc("core", "tickActor", \
     "end:" + pActor + "\n" + \
