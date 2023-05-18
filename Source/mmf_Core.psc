@@ -6,6 +6,7 @@ scriptName mmf_Core extends ReferenceAlias
 
 ; properties set by game engine
 FormList property gTrackingList auto
+FormList property gMilkQualityList auto
 Spell property gMilktrackerSpell auto
 GlobalVariable property gGameTime auto
 
@@ -63,6 +64,8 @@ float property gStomachSoftMax auto
 float property gStomachHardMax auto
 float property gStomachAbsorbTime auto
 
+float property gMilkPerBottle auto
+
 ; local global variables
 int gSelectKey = 9
 
@@ -103,6 +106,8 @@ string cOptionStomachSoftMax = ".option.stomach.max.soft"
 string cOptionStomachHardMax = ".option.stomach.max.hard"
 string cOptionStomachAbsorbTime = ".option.stomach.absorb.time"
 
+string cOptionMilkPerBottle = ".option.milk.per-bottle"
+
 string[] gSliderLevelName
 float[] gSliderLevelLow
 float[] gSliderLevelHigh
@@ -140,6 +145,8 @@ event OnInit()
   ; JValue_enableAPILog(true)
 
   registerNextUpdate()
+  RegisterForSleep()
+  RegisterForMenu("Sleep/Wait Menu")
 
   ReadOptionsFromFile()
 
@@ -150,6 +157,26 @@ endEvent
 
 event OnPlayerLoadGame()
   registerNextUpdate()
+endEvent
+
+event OnSleepStop(bool pInterrupt)
+  LogSrcFunc("core", "OnSleepStop", "")
+  RegisterForSingleUpdate(0.5)
+endEvent
+
+event OnLocationChange(Location pOld, Location pNew)
+  LogSrcFunc("core", "OnLocationChange", "")
+  RegisterForSingleUpdate(0.5)
+endEvent
+
+event OnPlayerFastTravelEnd(float pTime)
+  LogSrcFunc("core", "OnPlayerFastTravelEnd", "")
+  RegisterForSingleUpdate(0.5)
+endEvent
+
+event OnMenuClose(string pMenu)
+  LogSrcFunc("core", "OnMenuClose", pMenu)
+  RegisterForSingleUpdate(0.5)
 endEvent
 
 event OnUpdate()
@@ -573,13 +600,13 @@ function updateActorSlider(Actor pActor, float pValue, string pGroup)
   float[] lows = getSliderLowByGroup(pGroup)
   float[] highs = getSliderHighByGroup(pGroup)
 
-  LogSrcFunc("core", "updateActorSlider", "group=" + pGroup + ",pValue=" + pValue)
+  ; LogSrcFunc("core", "updateActorSlider", "group=" + pGroup + ",pValue=" + pValue)
 
   int index = names.Length - 1
   float value
   while index >= 0
     value = ((highs[index] - lows[index]) * pValue) + lows[index]
-    LogSrcFunc("core", "updateActorSlider", "actor=" + pActor + ",name=" + names[index] + ",key=" + "mmf"+pGroup + ",value=" + value)
+    ; LogSrcFunc("core", "updateActorSlider", "actor=" + pActor + ",name=" + names[index] + ",key=" + "mmf"+pGroup + ",value=" + value)
     NiOverride.SetBodyMorph(pActor, names[index], "mmf"+pGroup, value)
     index -= 1
   endWhile
@@ -908,6 +935,54 @@ endFunction
 ;
 ;---
 
+
+Form function MilkActorOnce(Actor pActor)
+  if !gTrackingList.HasForm(pActor) 
+    return None
+  endIf
+
+  int obj = JFormDB_findEntry(cBASE, pActor)
+  if obj == 0
+    return None
+  endIf
+
+  float milk = JValue_solveFlt(obj, cMilk)
+  float capacity = JValue_solveFlt(obj, cCapacity)
+
+  if milk <= 0.0 || \
+    capacity <= 0.0 || \
+    gMilkPerBottle <= 0.0 || \
+    milk < gMilkPerBottle
+
+    return None
+  endIf
+
+  float fill = fltMinMax(milk / capacity, 0.0, 1.0)
+  float normCap = fltMinMax(capacity / gMilkCapacitySoftMax, 0.0, 1.0)
+  float quality = fill * normCap
+
+  milk = fltMinMax(milk - gMilkPerBottle, 0.0, gMilkCapacityHardMax)
+
+  JValue_solveFltSetter(obj, cMilk, milk)
+
+  int len = gMilkQualityList.GetSize()
+  int index = gMilkQualityList.GetSize() - 1
+  while index >= 0
+    if ((index as float) / (len as float)) <= quality
+      updateActor(pActor)
+      return gMilkQualityList.GetAt(index)
+    endIf
+
+    index -= 1
+  endWhile
+
+  return None
+endFunction
+
+;--
+;
+;--
+
 string cName = "name"
 string cLow = "low"
 string cHigh = "high"
@@ -997,6 +1072,8 @@ function ReadOptionsFromFile()
   gStomachHardMax = JValue_solveFlt(obj, cOptionStomachHardMax, 100.0)
   gStomachAbsorbTime = JValue_solveFlt(obj, cOptionStomachAbsorbTime, 150.0)
 
+  gMilkPerBottle = JValue_solveFlt(obj, cOptionMilkPerBottle, 0.5)
+
   string[] sliderName = Utility.CreateStringArray(0)
   float[] sliderLow = Utility.CreateFloatArray(0)
   float[] sliderHigh = Utility.CreateFloatArray(0)
@@ -1079,7 +1156,9 @@ function WriteOptionsToFile()
 
   JValue_solveFltSetter(obj, cOptionStomachSoftMax, gStomachSoftMax, true)
   JValue_solveFltSetter(obj, cOptionStomachHardMax, gStomachHardMax, true)
+  JValue_solveFltSetter(obj, cOptionStomachAbsorbTime, gStomachAbsorbTime, true)
 
+  JValue_solveFltSetter(obj, cOptionMilkPerBottle, gMilkPerBottle, true)
 
   WriteOptionsSlidersToObj(obj, cMILK_FILLING_SLIDER, gSliderFillName, gSliderFillLow, gSliderFillHigh)
   WriteOptionsSlidersToObj(obj, cMILK_CAPACITY_SLIDER, gSliderLevelName, gSliderLevelLow, gSliderLevelHigh)

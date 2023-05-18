@@ -121,8 +121,7 @@ function DisplayPageOptions()
   SetCursorPosition(0)
 
   AddKeyMapOptionST("SelectKeySetup", "Option Key", gCore.GetSelectKey())
-  AddEmptyOption()
-
+  AddInputOptionST("SetMilkPerBottle", "Milk per Bottle", gCore.gMilkPerBottle)
 
   AddHeaderOption("Milk Capacity")
   AddEmptyOption()
@@ -551,6 +550,23 @@ bool function fltNotLessZero(float pValue)
   endIf
   return false
 endFunction
+
+state SetMilkPerBottle
+
+event OnInputOpenST()
+  SetInputDialogStartText(gCore.gMilkPerBottle)
+endEvent
+
+event OnInputAcceptST(string pValue)
+  float fValue = pValue as float
+  if fltNotBetween(fValue, 0.0, cMaxFlt)
+    return
+  endIf
+  gCore.gMilkPerBottle = fValue
+  SetInputOptionValueST(fValue)
+endEvent
+
+endState
 
 state SetMilkCapacitySoftMin
 
