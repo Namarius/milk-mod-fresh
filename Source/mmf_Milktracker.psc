@@ -16,6 +16,6 @@ event OnDeath(Actor pKiller)
   gCore.RemoveDirtyTrackingActor(self.GetTargetActor())
 endEvent
 
-event OnEffectEnd(Actor pTarget, Actor pCaster)
-  LogSrcFunc("milktracker", "OnEffectEnd", "act=" + pTarget)
+event OnEffectFinish(Actor pTarget, Actor pCaster)
+  LogSrcFunc("milktracker", "OnEffectFinish", "act=" + pTarget)
 endEvent
