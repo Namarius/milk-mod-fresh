@@ -360,7 +360,9 @@ endEvent
 
 event OnOptionHighlight(int pOption)
   if CurrentPage == Pages[1] || \
-    CurrentPage == Pages[2]
+    CurrentPage == Pages[2] || \
+    CurrentPage == Pages[3] || \
+    CurrentPage == Pages[4]
 
     SetInfoText("Click on slider to change name/low/high or remove")
   endIf
