@@ -8,6 +8,7 @@ scriptName mmf_Core extends ReferenceAlias
 FormList property gTrackingList auto
 FormList property gMilkQualityList auto
 Spell property gMilktrackerSpell auto
+Spell property gMilkingSpell auto
 GlobalVariable property gGameTime auto
 
 ; public read only constants
@@ -405,6 +406,10 @@ function setSliderHighByGroup(string pGroup, float[] pHigh)
 endFunction
 
 bool function RemoveSliderByGroup(string pGroup, string pName)
+  if !isValidSliderGroup(pGroup)
+    return false
+  endIf
+
   string[] names = getSliderNameByGroup(pGroup)
   float[] lows = getSliderLowByGroup(pGroup)
   float[] highs = getSliderHighByGroup(pGroup)
@@ -441,6 +446,10 @@ bool function RemoveSliderByGroup(string pGroup, string pName)
 endfunction
 
 bool function ReplaceSlidersByGroup(string pGroup, string[] pNames, float[] pLows, float[] pHighs)
+  if !isValidSliderGroup(pGroup)
+    return false
+  endIf
+
   int min = pNames.Length
   int b = pLows.Length
   int c = pHighs.Length
@@ -469,6 +478,10 @@ bool function ReplaceSlidersByGroup(string pGroup, string[] pNames, float[] pLow
 endFunction
 
 int function RenameSliderByGroup(string pGroup, string pOldName, string pNewName)
+  if !isValidSliderGroup(pGroup)
+    return -1
+  endIf
+
   string[] names = getSliderNameByGroup(pGroup)
   int index = 0
   int oldIndex = -1
@@ -523,23 +536,72 @@ function SetSelectKey(int pKeyCode)
   endIf
 endFunction
 
-event OnKeyUp(int pKeyCode, float pHoldTime) 
-  if Utility.IsInMenuMode() 
+event OnKeyUp(int pKeyCode, float pHoldTime)
+  if Utility.IsInMenuMode() ; We don't want any functionality in menus
     return
   endIf
 
-  ObjectReference ref = Game.GetCurrentCrosshairRef()
+  bool shift = Input.IsKeyPressed(42) || Input.IsKeyPressed(54) ; 42 = Left Shift, 54 = Right Shift
+  bool control = Input.IsKeyPressed(29) || Input.IsKeyPressed(157) ; 29 = Left Control, 157 = Right Control
 
-  if ref != None
-    Debug.MessageBox("Reference is: " + ref)
-    Actor act = ref as Actor
-    if act != None && !act.HasSpell(gMilktrackerSpell)
-      LogSrcFunc("core", "OnKeyUp", "act="+act)
-      act.AddSpell(gMilktrackerSpell, false)
-    endIf
+  ObjectReference ref = Game.GetCurrentCrosshairRef()
+  Actor act
+
+  if ref == None
+    act = GetActorRef()
+  else
+    act = ref as Actor
   endIf
 
+  if control || (pHoldTime > 3.0)
+    AddTrackingActor(act)
+    return
+  elseIf shift || (pHoldTime > 1.0)
+    startActorMilking(act)
+    return
+  endIf
+
+  showActorValues(act)
 endEvent
+
+function startActorMilking(Actor pActor)
+  if !gTrackingList.HasForm(pActor)
+    Debug.Notification(pActor.GetActorBase().GetName() + " is no milk producer")
+    return
+  endIf
+
+  if !pActor.HasSpell(gMilkingSpell)
+    pActor.AddSpell(gMilkingSpell, false)
+  endIf
+endFunction
+
+function showActorValues(Actor pActor)
+  if !gTrackingList.HasForm(pActor)
+    Debug.Notification(pActor.GetActorBase().GetName() + " is no milk producer")
+    return
+  endIf
+
+  int obj = JFormDB_findEntry(cBASE, pActor)
+  if obj == 0
+    Debug.MessageBox("Milk Mod Fresh:\n" + pActor.GetActorBase().GetName() + "has no data\nThis is a concerning error\n")
+    return 
+  endIf
+
+  obj = JValue_deepCopy(obj)
+  JValue_solveFltSetter(obj, cOptionMilkCapacitySoftMax, gMilkCapacitySoftMax, true)
+  JValue_solveFltSetter(obj, cOptionMilkProductionSoftMax, gMilkProductionSoftMax, true)
+  JValue_solveFltSetter(obj, cOptionLactacidSoftMax, gLactacidSoftMax, true)
+  JValue_solveFltSetter(obj, cOptionStomachSoftMax, gStomachSoftMax, true)
+  
+  Debug.Notification(pActor.GetActorBase().GetName() + " status:")
+  Debug.Notification(JValue_evalLuaStr(obj, "return string.format('Milk: %0.1f (%0.1f %%)', jobject.milk, (jobject.milk * 100) / jobject.capacity)"))
+  Debug.Notification(JValue_evalLuaStr(obj, "return string.format('Capacity: %0.1f (%0.1f %%)', jobject.capacity, (jobject.capacity * 100) / jobject" + cOptionMilkCapacitySoftMax + ")"))
+  Debug.Notification(JValue_evalLuaStr(obj, "return string.format('Production: %0.1f (%0.1f %%)', jobject.production, (jobject.production * 100) / jobject" + cOptionMilkProductionSoftMax+ ")"))
+  Debug.Notification(JValue_evalLuaStr(obj, "return string.format('Lactacid: %0.1f (%0.1f %%)', jobject.lactacid, (jobject.lactacid * 100) / jobject" + cOptionLactacidSoftMax + ")"))
+  Debug.Notification(JValue_evalLuaStr(obj, "return string.format('Stomach: %0.1f (%0.1f %%)', jobject.stomach, (jobject.stomach * 100) / jobject" + cOptionStomachSoftMax + ")"))
+
+  JValue_zeroLifetime(obj)
+endFunction
 
 ;---------------
 ; Actor Tracking
@@ -548,7 +610,7 @@ endEvent
 function AddTrackingActor(Actor pActor)
   int id = pActor.GetFormID()
   LogSrcFunc("core", "AddTrackingActor", "AddTrackingActor:id=" + id)
-  if id <= 0xFF000000
+  if id <= 0xFF000000 || id == 0
     return
   endIf
 
@@ -566,6 +628,9 @@ function AddTrackingActor(Actor pActor)
   JValue_solveFltSetter(obj, cGameTime, gGameTime.GetValue(), true)
 
   gTrackingList.AddForm(pActor)
+
+  Debug.Notification("Milk Mod Fresh tracking: " + pActor.GetActorBase().GetName())
+
   updateActor(pActor)
 endFunction
 
